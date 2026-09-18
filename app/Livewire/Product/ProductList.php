@@ -42,16 +42,58 @@ class ProductList extends Component
         ];
     }
 
+    public function updatedCategoryId($value)
+    {
+        if (!$this->isEditMode && $value) {
+            $this->generateSkuForCategory($value);
+        }
+    }
+
+    public function generateSkuForCategory($categoryId)
+    {
+        $category = Category::find($categoryId);
+        if (!$category) return;
+
+        $name = strtolower($category->name);
+        $prefix = 'PR';
+
+        if (str_contains($name, 'coffee') && !str_contains($name, 'non')) {
+            $prefix = 'CF';
+        } elseif (str_contains($name, 'non-coffee') || str_contains($name, 'non coffee')) {
+            $prefix = 'NC';
+        } elseif (str_contains($name, 'bakery') || str_contains($name, 'dessert')) {
+            $prefix = 'BK';
+        } elseif (str_contains($name, 'main') || str_contains($name, 'course')) {
+            $prefix = 'MC';
+        } elseif (str_contains($name, 'snack')) {
+            $prefix = 'SN';
+        } else {
+            $words = explode(' ', $name);
+            if (count($words) >= 2) {
+                $prefix = strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1));
+            } else {
+                $prefix = strtoupper(substr($name, 0, 2));
+            }
+        }
+
+        $existingSkus = Product::where('sku', 'like', $prefix . '-%')->pluck('sku')->toArray();
+        $number = 1;
+        while (in_array($prefix . '-' . str_pad($number, 3, '0', STR_PAD_LEFT), $existingSkus)) {
+            $number++;
+        }
+
+        $this->sku = $prefix . '-' . str_pad($number, 3, '0', STR_PAD_LEFT);
+    }
+
     public function openCreateModal()
     {
         $this->resetForm();
         $this->isEditMode = false;
         
-        // Auto generate SKU
-        $this->sku = 'CF-' . str_pad(Product::count() + 1, 3, '0', STR_PAD_LEFT);
         $firstCat = Category::first();
         if ($firstCat) {
             $this->category_id = $firstCat->id;
+            $this->generateSkuForCategory($firstCat->id);
         }
 
         $this->showFormModal = true;

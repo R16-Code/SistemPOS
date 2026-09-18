@@ -42,12 +42,23 @@
         <div class="flex-1 p-5 overflow-y-auto">
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 @forelse($products as $product)
-                    <div wire:click="addToCart({{ $product->id }})" 
-                         class="group bg-white border border-slate-200/80 hover:border-amber-500 rounded-2xl p-4 flex flex-col justify-between cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+                    @php
+                        $isOut = !$product->is_available || $product->stock <= 0;
+                    @endphp
+                    <div @if(!$isOut) wire:click="addToCart({{ $product->id }})" @endif
+                         class="group border rounded-2xl p-4 flex flex-col justify-between transition-all duration-200 relative overflow-hidden {{ $isOut ? 'bg-slate-100/90 border-slate-200 opacity-65 cursor-not-allowed select-none' : 'bg-white border-slate-200/80 hover:border-amber-500 cursor-pointer hover:-translate-y-0.5 hover:shadow-md' }}">
+                        
+                        <!-- Badge status habis/kosong -->
+                        @if($isOut)
+                            <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-rose-600 text-white font-extrabold text-[10px] tracking-wider uppercase shadow-2xs z-10">
+                                HABIS / KOSONG
+                            </span>
+                        @endif
+
                         <div>
                             <!-- Product Icon / Image Card -->
-                            <div class="w-full h-28 rounded-xl bg-amber-50 border border-amber-100 mb-3 flex items-center justify-center relative overflow-hidden group-hover:bg-amber-100/60 transition-colors">
-                                <div class="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-amber-700">
+                            <div class="w-full h-28 rounded-xl {{ $isOut ? 'bg-slate-200/70' : 'bg-amber-50 border border-amber-100 group-hover:bg-amber-100/60' }} mb-3 flex items-center justify-center relative overflow-hidden transition-colors">
+                                <div class="w-12 h-12 rounded-full {{ $isOut ? 'bg-slate-300 text-slate-500' : 'bg-white shadow-sm text-amber-700' }} flex items-center justify-center">
                                     <!-- Coffee SVG -->
                                     <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
                                         <path d="M2,21V19H20V21H2M20,8V5H18V8H20M20,3A2,2 0 0,1 22,5V8A2,2 0 0,1 20,10H18V13A4,4 0 0,1 14,17H8A4,4 0 0,1 4,13V3H20M16,5H6V13A2,2 0 0,0 8,15H14A2,2 0 0,0 16,13V5Z"/>
@@ -59,7 +70,7 @@
                             </div>
 
                             <!-- Name & Description -->
-                            <h3 class="font-bold text-slate-900 text-sm group-hover:text-amber-700 transition-colors line-clamp-1">
+                            <h3 class="font-bold text-slate-900 text-sm {{ $isOut ? 'line-through text-slate-500' : 'group-hover:text-amber-700' }} transition-colors line-clamp-1">
                                 {{ $product->name }}
                             </h3>
                             <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
@@ -71,17 +82,22 @@
                         <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
                             <div>
                                 <span class="text-[11px] text-slate-400 block font-medium">Harga</span>
-                                <span class="text-sm font-extrabold text-amber-800">
+                                <span class="text-sm font-extrabold {{ $isOut ? 'text-slate-500' : 'text-amber-800' }}">
                                     Rp {{ number_format($product->price, 0, ',', '.') }}
                                 </span>
                             </div>
                             
-                            <!-- Inline SVG Plus Icon (Will NEVER disappear on morph) -->
-                            <button class="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 group-hover:bg-amber-700 group-hover:text-white flex items-center justify-center transition-all shadow-2xs">
-                                <svg class="w-4 h-4 fill-none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
-                                </svg>
-                            </button>
+                            @if($isOut)
+                                <span class="px-2.5 py-1 rounded-lg bg-slate-200 text-slate-500 font-extrabold text-[10px] uppercase">
+                                    TIDAK TERSEDIA
+                                </span>
+                            @else
+                                <button class="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 group-hover:bg-amber-700 group-hover:text-white flex items-center justify-center transition-all shadow-2xs">
+                                    <svg class="w-4 h-4 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                </button>
+                            @endif
                         </div>
                     </div>
                 @empty

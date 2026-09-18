@@ -53,7 +53,10 @@ class Cashier extends Component
     public function addToCart($productId)
     {
         $product = Product::find($productId);
-        if (!$product || !$product->is_available) return;
+        // Do not add if product is unavailable or stock <= 0
+        if (!$product || !$product->is_available || $product->stock <= 0) {
+            return;
+        }
 
         $key = 'p_' . $product->id;
 
@@ -148,7 +151,7 @@ class Cashier extends Component
             // Generate Invoice Number
             $invoiceNumber = 'TRX-' . date('Ymd') . '-' . str_pad(Order::whereDate('created_at', now())->count() + 1, 4, '0', STR_PAD_LEFT);
 
-            // Default cashier user (user ID 2 from seeder or first user)
+            // Default cashier user
             $userId = auth()->id() ?? 2;
 
             $order = Order::create([
@@ -179,7 +182,7 @@ class Cashier extends Component
                     'notes' => $item['notes'],
                 ]);
 
-                // Reduce stock if applicable
+                // Reduce stock
                 Product::where('id', $item['product_id'])->decrement('stock', $item['quantity']);
             }
 
@@ -213,7 +216,8 @@ class Cashier extends Component
     {
         $categories = Category::where('is_active', true)->get();
 
-        $productsQuery = Product::where('is_available', true);
+        // Query ALL products (including disabled/out of stock so cashier sees them)
+        $productsQuery = Product::query();
 
         if ($this->selectedCategory) {
             $productsQuery->where('category_id', $this->selectedCategory);
