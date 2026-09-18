@@ -91,7 +91,7 @@
 
                         <div>
                             <label class="font-bold text-slate-700 block mb-1">Kategori</label>
-                            <select wire:model="category_id" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-900 focus:outline-none focus:border-amber-700">
+                            <select wire:model.live="category_id" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-900 focus:outline-none focus:border-amber-700">
                                 @foreach($categories as $cat)
                                     <option value="{{ $cat->id }}">{{ $cat->name }}</option>
                                 @endforeach
