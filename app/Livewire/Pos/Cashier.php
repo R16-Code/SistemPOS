@@ -296,7 +296,12 @@ class Cashier extends Component
 
     public function render()
     {
-        $categories = Category::where('is_active', true)->get();
+        $categories = Category::where('is_active', true)
+            ->withCount('products')
+            ->get();
+
+        $totalProductsCount = Product::count();
+
         $productsQuery = Product::with('variants');
 
         if ($this->selectedCategory) {
@@ -313,10 +318,14 @@ class Cashier extends Component
         $products = $productsQuery->get();
         $tables = Table::all();
 
+        $selectedCategoryModel = $this->selectedCategory ? Category::find($this->selectedCategory) : null;
+
         return view('livewire.pos.cashier', [
             'categories' => $categories,
+            'totalProductsCount' => $totalProductsCount,
             'products' => $products,
             'tables' => $tables,
+            'selectedCategoryModel' => $selectedCategoryModel,
         ]);
     }
 }

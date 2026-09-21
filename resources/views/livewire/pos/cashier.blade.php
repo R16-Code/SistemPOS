@@ -26,20 +26,39 @@
             <!-- Category Filter Pills -->
             <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
                 <button wire:click="selectCategory(null)" 
-                        class="px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-150 {{ is_null($selectedCategory) ? 'bg-amber-700 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200/60' }}">
-                    Semua Menu
+                        class="px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-150 flex items-center gap-2 {{ is_null($selectedCategory) ? 'bg-amber-700 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200/60' }}">
+                    <span>Semua Menu</span>
+                    <span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold {{ is_null($selectedCategory) ? 'bg-amber-800 text-amber-100' : 'bg-slate-200 text-slate-600' }}">
+                        {{ $totalProductsCount }}
+                    </span>
                 </button>
                 @foreach($categories as $cat)
                     <button wire:click="selectCategory({{ $cat->id }})" 
-                            class="px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-150 {{ $selectedCategory === $cat->id ? 'bg-amber-700 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200/60' }}">
-                        {{ $cat->name }}
+                            class="px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-150 flex items-center gap-2 {{ $selectedCategory === $cat->id ? 'bg-amber-700 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200/60' }}">
+                        <span>{{ $cat->name }}</span>
+                        <span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold {{ $selectedCategory === $cat->id ? 'bg-amber-800 text-amber-100' : 'bg-slate-200 text-slate-600' }}">
+                            {{ $cat->products_count }}
+                        </span>
                     </button>
                 @endforeach
             </div>
         </div>
 
         <!-- Product Grid -->
-        <div class="flex-1 p-5 overflow-y-auto">
+        <div class="flex-1 p-5 overflow-y-auto space-y-3">
+            <div class="flex items-center justify-between text-xs text-slate-500 font-medium px-1">
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-slate-700">Kategori: {{ $selectedCategoryModel ? $selectedCategoryModel->name : 'Semua Menu' }}</span>
+                    <span>&bull;</span>
+                    <span class="text-amber-800 font-semibold bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/60">
+                        {{ $products->count() }} menu tersedia
+                    </span>
+                    @if($search)
+                        <span class="text-slate-400">hasil pencarian "{{ $search }}"</span>
+                    @endif
+                </div>
+            </div>
+
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 @forelse($products as $product)
                     @php
