@@ -61,6 +61,27 @@ class OrderList extends Component
         $this->resetPage();
     }
 
+    public function updateOrderStatus(int $orderId, string $status): void
+    {
+        if (! in_array(auth()->user()?->role, ['admin', 'kitchen'])) {
+            return;
+        }
+
+        $validStatuses = ['pending', 'cooking', 'ready', 'completed', 'cancelled'];
+        if (! in_array($status, $validStatuses)) {
+            return;
+        }
+
+        $order = Order::findOrFail($orderId);
+        $order->update([
+            'order_status' => $status,
+        ]);
+
+        if ($status === 'completed' && $order->table_id) {
+            $order->table?->update(['status' => 'available']);
+        }
+    }
+
     public function render()
     {
         $ordersQuery = Order::with(['user', 'table', 'items'])->latest();

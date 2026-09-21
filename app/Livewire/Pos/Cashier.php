@@ -251,7 +251,7 @@ class Cashier extends Component
                 'total_amount' => $this->totalAmount,
                 'payment_method' => $this->paymentMethod,
                 'payment_status' => 'paid',
-                'order_status' => 'completed',
+                'order_status' => 'pending',
                 'paid_amount' => (float) $this->paidAmount,
                 'change_amount' => $this->changeAmount,
             ]);

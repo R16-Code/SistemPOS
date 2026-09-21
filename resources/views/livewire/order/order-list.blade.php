@@ -100,26 +100,44 @@
                         
                         <!-- Status Pesanan Dapur -->
                         <td class="px-5 py-4 text-center whitespace-nowrap">
-                            @if($order->order_status === 'pending')
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-200">
-                                    Menunggu
-                                </span>
-                            @elseif($order->order_status === 'cooking')
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-900 border border-blue-200">
-                                    Diproses
-                                </span>
-                            @elseif($order->order_status === 'ready')
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-900 border border-emerald-200">
-                                    Siap Saji
-                                </span>
-                            @elseif($order->order_status === 'completed')
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200">
-                                    Selesai
-                                </span>
+                            @if(in_array(auth()->user()?->role, ['admin', 'kitchen']))
+                                <select 
+                                    wire:change="updateOrderStatus({{ $order->id }}, $event.target.value)"
+                                    class="text-[11px] font-bold uppercase tracking-wider rounded-lg px-2.5 py-1 border cursor-pointer transition-colors focus:ring-2 focus:ring-amber-500/20 focus:outline-none {{ 
+                                        $order->order_status === 'pending' ? 'bg-amber-50 text-amber-900 border-amber-300' : (
+                                        $order->order_status === 'cooking' ? 'bg-blue-50 text-blue-900 border-blue-300' : (
+                                        $order->order_status === 'ready' ? 'bg-emerald-50 text-emerald-900 border-emerald-300' : (
+                                        $order->order_status === 'completed' ? 'bg-slate-100 text-slate-700 border-slate-300' : 'bg-rose-50 text-rose-800 border-rose-300'
+                                    ))) }}"
+                                >
+                                    <option value="pending" {{ $order->order_status === 'pending' ? 'selected' : '' }}>⏳ Menunggu</option>
+                                    <option value="cooking" {{ $order->order_status === 'cooking' ? 'selected' : '' }}>🍳 Sedang Diracik</option>
+                                    <option value="ready" {{ $order->order_status === 'ready' ? 'selected' : '' }}>🔔 Siap Saji</option>
+                                    <option value="completed" {{ $order->order_status === 'completed' ? 'selected' : '' }}>✅ Selesai</option>
+                                    <option value="cancelled" {{ $order->order_status === 'cancelled' ? 'selected' : '' }}>❌ Dibatalkan</option>
+                                </select>
                             @else
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-200">
-                                    {{ $order->order_status }}
-                                </span>
+                                @if($order->order_status === 'pending')
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-200">
+                                        Menunggu
+                                    </span>
+                                @elseif($order->order_status === 'cooking')
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-900 border border-blue-200">
+                                        Diproses
+                                    </span>
+                                @elseif($order->order_status === 'ready')
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-900 border border-emerald-200">
+                                        Siap Saji
+                                    </span>
+                                @elseif($order->order_status === 'completed')
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200">
+                                        Selesai
+                                    </span>
+                                @else
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-200">
+                                        {{ $order->order_status }}
+                                    </span>
+                                @endif
                             @endif
                         </td>
 

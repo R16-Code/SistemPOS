@@ -29,6 +29,10 @@ class KitchenOrders extends Component
         $order->update([
             'order_status' => $status,
         ]);
+
+        if ($status === 'completed' && $order->table_id) {
+            $order->table?->update(['status' => 'available']);
+        }
     }
 
     public function render()
