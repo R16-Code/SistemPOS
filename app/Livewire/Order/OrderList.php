@@ -28,6 +28,10 @@ class OrderList extends Component
 
     public bool $showReceiptModal = false;
 
+    public ?Order $selectedOrderDetail = null;
+
+    public bool $showOrderDetailModal = false;
+
     public function mount()
     {
         // Default to all or empty
@@ -96,6 +100,18 @@ class OrderList extends Component
     {
         $this->showReceiptModal = false;
         $this->selectedOrderForReceipt = null;
+    }
+
+    public function showOrderDetail(int $orderId): void
+    {
+        $this->selectedOrderDetail = Order::with(['items', 'table', 'user'])->findOrFail($orderId);
+        $this->showOrderDetailModal = true;
+    }
+
+    public function closeOrderDetailModal(): void
+    {
+        $this->showOrderDetailModal = false;
+        $this->selectedOrderDetail = null;
     }
 
     public function render()

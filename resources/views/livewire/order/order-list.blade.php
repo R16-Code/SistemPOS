@@ -57,122 +57,242 @@
         </div>
     </div>
 
-    <div class="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm">
-        <table class="w-full text-left text-xs text-slate-700">
-            <thead class="bg-slate-100/70 text-slate-600 border-b border-slate-200 font-bold uppercase tracking-wider text-[11px]">
-                <tr>
-                    <th class="px-5 py-4">Invoice</th>
-                    <th class="px-5 py-4">Waktu</th>
-                    <th class="px-5 py-4">Pelanggan & Meja</th>
-                    <th class="px-5 py-4">Menu Dipesan</th>
-                    <th class="px-5 py-4">Total</th>
-                    <th class="px-5 py-4 text-center">Status Dapur</th>
-                    <th class="px-5 py-4 text-center">Pembayaran</th>
-                    <th class="px-5 py-4 text-center">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-                @forelse($orders as $order)
-                    <tr class="hover:bg-slate-50/80 transition-colors">
-                        <td class="px-5 py-4 font-bold text-slate-900 font-mono">{{ $order->invoice_number }}</td>
-                        <td class="px-5 py-4 text-slate-500 whitespace-nowrap">{{ $order->created_at->format('d/m/Y H:i') }}</td>
-                        <td class="px-5 py-4">
-                            <span class="font-bold text-slate-900 block">{{ $order->customer_name }}</span>
-                            <span class="text-[11px] text-slate-500 capitalize">
-                                {{ $order->order_type }}
-                                @if($order->table)
-                                    &bull; <strong class="text-amber-800">{{ $order->table->table_number }}</strong>
-                                @endif
-                            </span>
-                        </td>
-                        <td class="px-5 py-4">
-                            <div class="space-y-1 max-w-xs">
-                                @foreach($order->items as $item)
-                                    <div class="text-[11px] leading-tight">
-                                        <span class="font-bold text-slate-800">{{ $item->quantity }}x</span> {{ $item->product_name }}
-                                        @if($item->notes)
-                                            <span class="text-amber-700 font-medium">({{ $item->notes }})</span>
-                                        @endif
+    <div class="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full table-fixed text-left text-xs text-slate-700">
+                <colgroup>
+                    <col class="w-[16%]">
+                    <col class="w-[11%]">
+                    <col class="w-[13%]">
+                    <col class="w-[20%]">
+                    <col class="w-[10%]">
+                    <col class="w-[11%]">
+                    <col class="w-[9%]">
+                    <col class="w-[10%]">
+                </colgroup>
+                <thead class="bg-slate-100/70 text-slate-600 border-b border-slate-200 font-bold uppercase tracking-wider text-[10px]">
+                    <tr>
+                        <th class="px-3 py-3.5 whitespace-nowrap">Invoice</th>
+                        <th class="px-2.5 py-3.5 whitespace-nowrap">Waktu</th>
+                        <th class="px-3 py-3.5">Pelanggan & Meja</th>
+                        <th class="px-3 py-3.5">Menu Dipesan</th>
+                        <th class="px-3 py-3.5 text-right whitespace-nowrap">Total</th>
+                        <th class="px-2 py-3.5 text-center whitespace-nowrap">Status Dapur</th>
+                        <th class="px-2 py-3.5 text-center whitespace-nowrap">Pembayaran</th>
+                        <th class="px-2 py-3.5 text-center whitespace-nowrap">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @forelse($orders as $order)
+                        <tr class="hover:bg-slate-50/80 transition-colors">
+                            <td class="px-3 py-3 font-bold text-slate-900 font-mono whitespace-nowrap text-[11px]">{{ $order->invoice_number }}</td>
+                            <td class="px-2.5 py-3 text-slate-500 whitespace-nowrap text-[11px]">{{ $order->created_at->format('d/m/Y H:i') }}</td>
+                            <td class="px-3 py-3">
+                                <span class="font-bold text-slate-900 block leading-tight truncate">{{ $order->customer_name }}</span>
+                                <span class="text-[10px] text-slate-500 capitalize">
+                                    {{ $order->order_type }}
+                                    @if($order->table)
+                                        &bull; <strong class="text-amber-800">{{ $order->table->table_number }}</strong>
+                                    @endif
+                                </span>
+                            </td>
+                            
+                            <!-- Menu Dipesan: Ringkas & Klik untuk Rincian -->
+                            <td class="px-3 py-3">
+                                @if(count($order->items) > 0)
+                                    @php
+                                        $firstItem = $order->items->first();
+                                        $remainingCount = count($order->items) - 1;
+                                    @endphp
+                                    <div class="text-[11px] leading-snug">
+                                        <button type="button" 
+                                                wire:click="showOrderDetail({{ $order->id }})" 
+                                                title="Klik untuk melihat rincian pesanan"
+                                                class="text-left group/item cursor-pointer block w-full">
+                                            <div class="font-medium text-slate-800 truncate group-hover/item:text-amber-900 transition-colors">
+                                                <span class="font-bold text-slate-900">{{ $firstItem->quantity }}x</span> {{ $firstItem->product_name }}
+                                                @if($firstItem->notes)
+                                                    <span class="text-amber-800 font-normal italic text-[10px]">({{ $firstItem->notes }})</span>
+                                                @endif
+                                            </div>
+
+                                            @if($remainingCount > 0)
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 mt-0.5 rounded-md text-[10px] font-bold text-amber-900 bg-amber-50 group-hover/item:bg-amber-100 border border-amber-200/80 transition-all">
+                                                    <span>+{{ $remainingCount }} menu lainnya</span>
+                                                    <svg class="w-2.5 h-2.5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                                </span>
+                                            @endif
+                                        </button>
                                     </div>
-                                @endforeach
-                            </div>
-                        </td>
-                        <td class="px-5 py-4 font-extrabold text-amber-800 whitespace-nowrap">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</td>
-                        
-                        <!-- Status Pesanan Dapur -->
-                        <td class="px-5 py-4 text-center whitespace-nowrap">
-                            @if(in_array(auth()->user()?->role, ['admin', 'kitchen']))
-                                <select 
-                                    wire:change="updateOrderStatus({{ $order->id }}, $event.target.value)"
-                                    class="text-[11px] font-bold uppercase tracking-wider rounded-lg px-2.5 py-1 border cursor-pointer transition-colors focus:ring-2 focus:ring-amber-500/20 focus:outline-none {{ 
-                                        $order->order_status === 'pending' ? 'bg-amber-50 text-amber-900 border-amber-300' : (
-                                        $order->order_status === 'cooking' ? 'bg-blue-50 text-blue-900 border-blue-300' : (
-                                        $order->order_status === 'ready' ? 'bg-emerald-50 text-emerald-900 border-emerald-300' : (
-                                        $order->order_status === 'completed' ? 'bg-slate-100 text-slate-700 border-slate-300' : 'bg-rose-50 text-rose-800 border-rose-300'
-                                    ))) }}"
-                                >
-                                    <option value="pending" {{ $order->order_status === 'pending' ? 'selected' : '' }}>⏳ Menunggu</option>
-                                    <option value="cooking" {{ $order->order_status === 'cooking' ? 'selected' : '' }}>🍳 Sedang Diracik</option>
-                                    <option value="ready" {{ $order->order_status === 'ready' ? 'selected' : '' }}>🔔 Siap Saji</option>
-                                    <option value="completed" {{ $order->order_status === 'completed' ? 'selected' : '' }}>✅ Selesai</option>
-                                    <option value="cancelled" {{ $order->order_status === 'cancelled' ? 'selected' : '' }}>❌ Dibatalkan</option>
-                                </select>
-                            @else
+                                @else
+                                    <span class="text-slate-400 italic text-[11px]">-</span>
+                                @endif
+                            </td>
+
+                            <td class="px-3 py-3 font-extrabold text-amber-800 whitespace-nowrap text-right text-xs">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</td>
+                            
+                            <!-- Status Pesanan Dapur (Badge Informatif) -->
+                            <td class="px-3 py-3 text-center whitespace-nowrap">
                                 @if($order->order_status === 'pending')
-                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-200">
-                                        Menunggu
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                        <span>Menunggu</span>
                                     </span>
                                 @elseif($order->order_status === 'cooking')
-                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-900 border border-blue-200">
-                                        Diproses
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-900 border border-blue-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                                        <span>Sedang Diracik</span>
                                     </span>
                                 @elseif($order->order_status === 'ready')
-                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-900 border border-emerald-200">
-                                        Siap Saji
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-900 border border-emerald-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                        <span>Siap Saji</span>
                                     </span>
                                 @elseif($order->order_status === 'completed')
-                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200">
-                                        Selesai
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                        <span>Selesai</span>
                                     </span>
                                 @else
-                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-200">
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-200">
                                         {{ $order->order_status }}
                                     </span>
                                 @endif
-                            @endif
-                        </td>
+                            </td>
 
-                        <!-- Status Pembayaran -->
-                        <td class="px-5 py-4 text-center whitespace-nowrap">
-                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider {{ $order->payment_status === 'paid' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}">
-                                {{ $order->payment_status === 'paid' ? 'LUNAS' : 'PENDING' }}
-                            </span>
-                            <span class="text-[10px] text-slate-400 uppercase font-mono block mt-0.5">{{ $order->payment_method }}</span>
-                        </td>
+                            <!-- Status Pembayaran -->
+                            <td class="px-2 py-3 text-center whitespace-nowrap">
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider {{ $order->payment_status === 'paid' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}">
+                                    {{ $order->payment_status === 'paid' ? 'LUNAS' : 'PENDING' }}
+                                </span>
+                                <span class="text-[9px] text-slate-400 uppercase font-mono block mt-0.5">{{ $order->payment_method }}</span>
+                            </td>
 
-                        <!-- Aksi Cetak Ulang Struk -->
-                        <td class="px-5 py-4 text-center whitespace-nowrap">
-                            <button wire:click="showReceipt({{ $order->id }})" 
-                                    type="button" 
-                                    title="Cetak Ulang Struk"
-                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-amber-50 hover:text-amber-900 border border-slate-200/80 hover:border-amber-200 transition-all shadow-2xs">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                                <span>Struk</span>
-                            </button>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="8" class="px-6 py-12 text-center text-slate-400">Belum ada transaksi ditemukan untuk filter ini</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+                            <!-- Aksi Cetak Ulang Struk -->
+                            <td class="px-2 py-3 text-center whitespace-nowrap">
+                                <button wire:click="showReceipt({{ $order->id }})" 
+                                        type="button" 
+                                        title="Cetak Ulang Struk"
+                                        class="inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-amber-50 hover:text-amber-900 border border-slate-200/80 hover:border-amber-200 transition-all shadow-2xs cursor-pointer">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                    <span>Struk</span>
+                                </button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="8" class="px-6 py-12 text-center text-slate-400">Belum ada transaksi ditemukan untuk filter ini</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
 
         <div class="p-4 border-t border-slate-100">
             {{ $orders->links() }}
         </div>
     </div>
+
+    <!-- MODAL RINCIAN PESANAN LENGKAP -->
+    @if($showOrderDetailModal && $selectedOrderDetail)
+        <div class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-slate-200 overflow-hidden space-y-4 p-6">
+                <div class="flex items-start justify-between border-b border-slate-100 pb-3">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-base font-black text-slate-900 font-mono">{{ $selectedOrderDetail->invoice_number }}</h3>
+                            @if($selectedOrderDetail->order_status === 'pending')
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-200">
+                                    Menunggu
+                                </span>
+                            @elseif($selectedOrderDetail->order_status === 'cooking')
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-900 border border-blue-200">
+                                    Sedang Diracik
+                                </span>
+                            @elseif($selectedOrderDetail->order_status === 'ready')
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-900 border border-emerald-200">
+                                    Siap Saji
+                                </span>
+                            @elseif($selectedOrderDetail->order_status === 'completed')
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200">
+                                    Selesai
+                                </span>
+                            @else
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-200">
+                                    {{ $selectedOrderDetail->order_status }}
+                                </span>
+                            @endif
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">
+                            {{ $selectedOrderDetail->created_at->format('d F Y, H:i') }} &bull; Pelanggan: <strong class="text-slate-800">{{ $selectedOrderDetail->customer_name }}</strong>
+                            <span class="capitalize">({{ $selectedOrderDetail->order_type }} @if($selectedOrderDetail->table) &bull; Meja {{ $selectedOrderDetail->table->table_number }} @endif)</span>
+                        </p>
+                    </div>
+                    <button wire:click="closeOrderDetailModal" type="button" class="text-slate-400 hover:text-slate-700 transition-colors p-1 cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- List of items -->
+                <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">Daftar Menu Dipesan ({{ count($selectedOrderDetail->items) }} Item)</span>
+                    <div class="divide-y divide-slate-100 border border-slate-200/80 rounded-xl overflow-hidden bg-slate-50/50">
+                        @foreach($selectedOrderDetail->items as $item)
+                            <div class="p-3 flex items-start justify-between text-xs gap-3">
+                                <div>
+                                    <div class="font-bold text-slate-900 text-[13px]">
+                                        <span>{{ $item->quantity }}x</span> {{ $item->product_name }}
+                                    </div>
+                                    @if($item->notes)
+                                        <p class="text-[11px] text-amber-900 font-medium italic mt-0.5">Catatan Varian: {{ $item->notes }}</p>
+                                    @endif
+                                    <span class="text-[10px] text-slate-400 font-mono">@ Rp {{ number_format($item->unit_price, 0, ',', '.') }}</span>
+                                </div>
+                                <div class="font-extrabold text-slate-900 font-mono whitespace-nowrap text-right pt-0.5">
+                                    Rp {{ number_format($item->subtotal, 0, ',', '.') }}
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <!-- Financial summary -->
+                <div class="bg-slate-50 rounded-xl p-3.5 space-y-1.5 text-xs border border-slate-200/60">
+                    <div class="flex justify-between text-slate-600">
+                        <span>Subtotal:</span>
+                        <span class="font-bold text-slate-900">Rp {{ number_format($selectedOrderDetail->subtotal, 0, ',', '.') }}</span>
+                    </div>
+                    @if($selectedOrderDetail->discount_amount > 0)
+                        <div class="flex justify-between text-emerald-700 font-bold">
+                            <span>Diskon:</span>
+                            <span>- Rp {{ number_format($selectedOrderDetail->discount_amount, 0, ',', '.') }}</span>
+                        </div>
+                    @endif
+                    <div class="flex justify-between text-slate-600">
+                        <span>PPN (11%):</span>
+                        <span class="font-bold text-slate-900">Rp {{ number_format($selectedOrderDetail->tax_amount, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm font-black text-slate-950 border-t border-slate-200 pt-2">
+                        <span>Total Pembayaran:</span>
+                        <span class="text-amber-900">Rp {{ number_format($selectedOrderDetail->total_amount, 0, ',', '.') }}</span>
+                    </div>
+                </div>
+
+                <!-- Modal Actions -->
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button wire:click="showReceipt({{ $selectedOrderDetail->id }})" 
+                            type="button" 
+                            class="px-4 py-2 bg-amber-800 hover:bg-amber-900 text-white rounded-xl text-xs font-bold transition-all inline-flex items-center gap-1.5 shadow-sm shadow-amber-800/20 cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                        <span>Cetak Struk</span>
+                    </button>
+                    <button wire:click="closeOrderDetailModal" type="button" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
 
     <!-- MODAL CETAK STRUK THERMAL -->
     @if($showReceiptModal && $selectedOrderForReceipt)
