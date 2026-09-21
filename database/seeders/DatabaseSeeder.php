@@ -88,7 +88,7 @@ class DatabaseSeeder extends Seeder
                     ['group' => 'Temperature', 'name' => 'Hot', 'extra' => 0],
                     ['group' => 'Size', 'name' => 'Regular', 'extra' => 0],
                     ['group' => 'Size', 'name' => 'Large', 'extra' => 5000],
-                ]
+                ],
             ],
             [
                 'category_id' => $catMap['Coffee'],
@@ -100,7 +100,7 @@ class DatabaseSeeder extends Seeder
                 'variants' => [
                     ['group' => 'Temperature', 'name' => 'Ice', 'extra' => 2000],
                     ['group' => 'Temperature', 'name' => 'Hot', 'extra' => 0],
-                ]
+                ],
             ],
             [
                 'category_id' => $catMap['Coffee'],
@@ -109,7 +109,7 @@ class DatabaseSeeder extends Seeder
                 'price' => 28000,
                 'description' => 'Espresso, steamed milk, vanilla syrup & caramel drizzle',
                 'stock' => 50,
-                'variants' => []
+                'variants' => [],
             ],
             [
                 'category_id' => $catMap['Non-Coffee'],
@@ -121,7 +121,7 @@ class DatabaseSeeder extends Seeder
                 'variants' => [
                     ['group' => 'Temperature', 'name' => 'Ice', 'extra' => 0],
                     ['group' => 'Temperature', 'name' => 'Hot', 'extra' => 0],
-                ]
+                ],
             ],
             [
                 'category_id' => $catMap['Bakery & Dessert'],
@@ -130,7 +130,7 @@ class DatabaseSeeder extends Seeder
                 'price' => 20000,
                 'description' => 'Flaky French Butter Croissant fresh baked',
                 'stock' => 30,
-                'variants' => []
+                'variants' => [],
             ],
             [
                 'category_id' => $catMap['Main Course'],
@@ -139,7 +139,7 @@ class DatabaseSeeder extends Seeder
                 'price' => 32000,
                 'description' => 'Nasi goreng gurih dengan telur mata sapi & sosis premium',
                 'stock' => 40,
-                'variants' => []
+                'variants' => [],
             ],
             [
                 'category_id' => $catMap['Snack'],
@@ -148,7 +148,7 @@ class DatabaseSeeder extends Seeder
                 'price' => 18000,
                 'description' => 'Kentang goreng renyah bumbu sea salt & mayo dip',
                 'stock' => 50,
-                'variants' => []
+                'variants' => [],
             ],
         ];
 
@@ -167,5 +167,7 @@ class DatabaseSeeder extends Seeder
                 ]);
             }
         }
+
+        $this->call(AdditionalProductsSeeder::class);
     }
 }

@@ -14,10 +14,19 @@
         </div>
 
         <div class="flex items-center gap-3">
+            <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200/80 rounded-xl text-[11px] font-medium text-slate-600 shadow-2xs">
+                <span class="text-slate-400 font-semibold text-[10px] uppercase tracking-wider mr-1">Waktu Tunggu:</span>
+                <span class="inline-flex items-center gap-1 text-emerald-800"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>&lt;15m</span>
+                <span class="text-slate-300">&bull;</span>
+                <span class="inline-flex items-center gap-1 text-amber-800"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>15-30m</span>
+                <span class="text-slate-300">&bull;</span>
+                <span class="inline-flex items-center gap-1 text-rose-800 font-bold"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>&gt;30m (Prioritas)</span>
+            </div>
+
             <input type="text" 
                    wire:model.live.debounce.250ms="search" 
                    placeholder="Cari invoice / pelanggan..." 
-                   class="bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs text-slate-900 focus:outline-none focus:border-amber-700 shadow-2xs w-64">
+                   class="bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs text-slate-900 focus:outline-none focus:border-amber-700 shadow-2xs w-56">
         </div>
     </div>
 
@@ -76,22 +85,53 @@
                 
                 <!-- Card Header -->
                 <div class="p-4 border-b border-slate-100 {{ $order->order_status === 'cooking' ? 'bg-blue-50/40' : ($order->order_status === 'ready' ? 'bg-emerald-50/40' : 'bg-slate-50/60') }}">
-                    <div class="flex items-start justify-between gap-2">
+                    <div class="flex items-start justify-between gap-3">
                         <div>
-                            <div class="flex items-center gap-2">
-                                <span class="font-mono font-extrabold text-sm text-slate-900">{{ $order->invoice_number }}</span>
-                                <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider {{ $order->order_type === 'dine_in' ? 'bg-amber-100 text-amber-900 border border-amber-200' : 'bg-slate-200 text-slate-800' }}">
-                                    {{ $order->order_type === 'dine_in' ? ($order->table->table_number ?? 'Dine In') : 'Takeaway' }}
-                                </span>
-                            </div>
-                            <p class="text-xs font-semibold text-slate-700 mt-1">Pelanggan: <span class="font-bold text-slate-900">{{ $order->customer_name }}</span></p>
+                            <span class="font-mono font-extrabold text-sm text-slate-900 block leading-tight whitespace-nowrap">{{ $order->invoice_number }}</span>
+                            <p class="text-xs font-semibold text-slate-600 mt-1">Pelanggan: <strong class="text-slate-900 font-bold">{{ $order->customer_name }}</strong></p>
                         </div>
 
-                        <!-- Timer / Waktu Pemesanan -->
+                        <!-- Waktu Pemesanan & Indikator Tunggu -->
+                        @php
+                            $diffMinutes = (int) $order->created_at->diffInMinutes(now());
+                            if ($diffMinutes < 1) {
+                                $timeText = '< 1 mnt';
+                            } elseif ($diffMinutes < 60) {
+                                $timeText = $diffMinutes . ' mnt';
+                            } else {
+                                $hours = floor($diffMinutes / 60);
+                                $remainingMins = $diffMinutes % 60;
+                                $timeText = $remainingMins > 0 ? "{$hours}j {$remainingMins}m" : "{$hours} jam";
+                            }
+
+                            if ($order->order_status === 'completed') {
+                                $waitBadgeClass = 'bg-slate-100 text-slate-600 border-slate-200';
+                                $waitDotClass = 'bg-slate-400';
+                                $isOverdue = false;
+                            } elseif ($diffMinutes < 15) {
+                                $waitBadgeClass = 'bg-emerald-50 text-emerald-800 border-emerald-200';
+                                $waitDotClass = 'bg-emerald-500';
+                                $isOverdue = false;
+                            } elseif ($diffMinutes < 30) {
+                                $waitBadgeClass = 'bg-amber-50 text-amber-900 border-amber-200';
+                                $waitDotClass = 'bg-amber-500';
+                                $isOverdue = false;
+                            } else {
+                                $waitBadgeClass = 'bg-rose-50 text-rose-800 border-rose-300';
+                                $waitDotClass = 'bg-rose-500';
+                                $isOverdue = true;
+                            }
+                        @endphp
                         <div class="text-right shrink-0">
-                            <span class="text-[11px] font-mono text-slate-500 block">{{ $order->created_at->format('H:i') }}</span>
-                            <span class="text-[10px] font-semibold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 inline-block mt-0.5">
-                                {{ $order->created_at->diffForHumans(null, true) }}
+                            <span class="text-[11px] font-mono text-slate-500 block">{{ $order->created_at->format('H:i') }} WIB</span>
+                            <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-md border mt-0.5 {{ $waitBadgeClass }}" title="Waktu tunggu pesanan: {{ $timeText }}">
+                                <span class="relative flex h-1.5 w-1.5">
+                                    @if($isOverdue && in_array($order->order_status, ['pending', 'cooking']))
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                                    @endif
+                                    <span class="relative inline-flex rounded-full h-1.5 w-1.5 {{ $waitDotClass }}"></span>
+                                </span>
+                                <span>Tunggu: {{ $timeText }}</span>
                             </span>
                         </div>
                     </div>
@@ -120,7 +160,7 @@
                 </div>
 
                 <!-- Card Footer & Action Buttons -->
-                <div class="p-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between gap-3">
+                <div class="p-3.5 border-t border-slate-100 bg-slate-50/60 flex items-center justify-between gap-2">
                     <div>
                         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Status</span>
                         @if($order->order_status === 'pending')
@@ -145,25 +185,29 @@
                         @endif
                     </div>
 
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 justify-end flex-wrap">
+                        <span class="px-2.5 py-1 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap {{ $order->order_type === 'dine_in' ? 'bg-amber-100 text-amber-900 border border-amber-200/90 shadow-2xs' : 'bg-slate-200 text-slate-700 border border-slate-300/80' }}">
+                            {{ $order->order_type === 'dine_in' ? ($order->table->table_number ?? 'Dine In') : 'Takeaway' }}
+                        </span>
+
                         @if($order->order_status === 'pending')
                             <button type="button" 
                                     wire:click="updateOrderStatus({{ $order->id }}, 'cooking')" 
-                                    class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl transition-all shadow-xs flex items-center gap-1.5">
+                                    class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 <span>Mulai Proses</span>
                             </button>
                         @elseif($order->order_status === 'cooking')
                             <button type="button" 
                                     wire:click="updateOrderStatus({{ $order->id }}, 'ready')" 
-                                    class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all shadow-xs flex items-center gap-1.5">
+                                    class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                 <span>Siap Saji</span>
                             </button>
                         @elseif($order->order_status === 'ready')
                             <button type="button" 
                                     wire:click="updateOrderStatus({{ $order->id }}, 'completed')" 
-                                    class="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded-xl transition-all shadow-xs flex items-center gap-1.5">
+                                    class="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 <span>Selesaikan</span>
                             </button>
