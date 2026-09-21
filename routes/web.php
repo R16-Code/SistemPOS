@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ReportPrintController;
 use App\Livewire\Auth\Login;
 use App\Livewire\Kitchen\KitchenOrders;
 use App\Livewire\Order\OrderList;
@@ -38,5 +39,6 @@ Route::middleware(['auth'])->group(function () {
     // Khusus Admin / Owner: Kelola Menu Produk, Laporan Keuangan, & Manajemen User
     Route::get('/products', ProductList::class)->name('products')->middleware('role:admin');
     Route::get('/reports', ReportIndex::class)->name('reports')->middleware('role:admin');
+    Route::get('/reports/print', [ReportPrintController::class, 'printReport'])->name('reports.print')->middleware('role:admin');
     Route::get('/users', UserList::class)->name('users')->middleware('role:admin');
 });

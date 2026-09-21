@@ -24,6 +24,10 @@ class OrderList extends Component
 
     public $endDate = null;
 
+    public ?Order $selectedOrderForReceipt = null;
+
+    public bool $showReceiptModal = false;
+
     public function mount()
     {
         // Default to all or empty
@@ -80,6 +84,18 @@ class OrderList extends Component
         if ($status === 'completed' && $order->table_id) {
             $order->table?->update(['status' => 'available']);
         }
+    }
+
+    public function showReceipt(int $orderId): void
+    {
+        $this->selectedOrderForReceipt = Order::with(['items', 'table', 'user'])->findOrFail($orderId);
+        $this->showReceiptModal = true;
+    }
+
+    public function closeReceiptModal(): void
+    {
+        $this->showReceiptModal = false;
+        $this->selectedOrderForReceipt = null;
     }
 
     public function render()

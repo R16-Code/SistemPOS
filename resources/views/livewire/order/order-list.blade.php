@@ -68,6 +68,7 @@
                     <th class="px-5 py-4">Total</th>
                     <th class="px-5 py-4 text-center">Status Dapur</th>
                     <th class="px-5 py-4 text-center">Pembayaran</th>
+                    <th class="px-5 py-4 text-center">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
@@ -148,10 +149,21 @@
                             </span>
                             <span class="text-[10px] text-slate-400 uppercase font-mono block mt-0.5">{{ $order->payment_method }}</span>
                         </td>
+
+                        <!-- Aksi Cetak Ulang Struk -->
+                        <td class="px-5 py-4 text-center whitespace-nowrap">
+                            <button wire:click="showReceipt({{ $order->id }})" 
+                                    type="button" 
+                                    title="Cetak Ulang Struk"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-amber-50 hover:text-amber-900 border border-slate-200/80 hover:border-amber-200 transition-all shadow-2xs">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                <span>Struk</span>
+                            </button>
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="px-6 py-12 text-center text-slate-400">Belum ada transaksi ditemukan untuk filter ini</td>
+                        <td colspan="8" class="px-6 py-12 text-center text-slate-400">Belum ada transaksi ditemukan untuk filter ini</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -161,4 +173,114 @@
             {{ $orders->links() }}
         </div>
     </div>
+
+    <!-- MODAL CETAK STRUK THERMAL -->
+    @if($showReceiptModal && $selectedOrderForReceipt)
+        <div class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div class="bg-white text-slate-900 rounded-2xl w-full max-w-sm p-6 shadow-2xl space-y-4 font-mono text-xs border border-slate-200">
+                
+                <div id="thermal-receipt-modal" class="space-y-3">
+                    <div class="text-center space-y-1">
+                        <h2 class="font-bold text-base text-black uppercase tracking-wider">BREWPOS COFFEE</h2>
+                        <p class="text-[11px] text-slate-600">Jl. Mawar No. 123, Jakarta</p>
+                        <p class="text-[11px] text-slate-600">Telp: 0812-3456-7890</p>
+                        <div class="border-b border-dashed border-slate-400 my-2"></div>
+                    </div>
+
+                    <div class="space-y-0.5 text-[11px]">
+                        <p>No: <span class="font-bold">{{ $selectedOrderForReceipt->invoice_number }}</span></p>
+                        <p>Tanggal: {{ $selectedOrderForReceipt->created_at->format('d/m/Y H:i') }}</p>
+                        <p>Kasir: {{ $selectedOrderForReceipt->user->name ?? 'Kasir' }}</p>
+                        <p>Pelanggan: {{ $selectedOrderForReceipt->customer_name }}</p>
+                        <p>Tipe: {{ strtoupper($selectedOrderForReceipt->order_type) }} @if($selectedOrderForReceipt->table) ({{ $selectedOrderForReceipt->table->table_number }}) @endif</p>
+                    </div>
+
+                    <div class="border-b border-dashed border-slate-400"></div>
+
+                    <!-- Items -->
+                    <div class="space-y-1">
+                        @foreach($selectedOrderForReceipt->items as $item)
+                            <div class="space-y-0.5">
+                                <div class="flex justify-between">
+                                    <span class="font-bold">{{ $item->product_name }} x{{ $item->quantity }}</span>
+                                    <span>{{ number_format($item->subtotal, 0, ',', '.') }}</span>
+                                </div>
+                                @if(!empty($item->notes))
+                                    <p class="text-[10px] text-slate-500 italic pl-2">({{ $item->notes }})</p>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <div class="border-b border-dashed border-slate-400"></div>
+
+                    <!-- Summary -->
+                    <div class="space-y-0.5 text-right">
+                        <div class="flex justify-between">
+                            <span>Subtotal:</span>
+                            <span>{{ number_format($selectedOrderForReceipt->subtotal, 0, ',', '.') }}</span>
+                        </div>
+                        @if($selectedOrderForReceipt->discount_amount > 0)
+                            <div class="flex justify-between">
+                                <span>Diskon:</span>
+                                <span>-{{ number_format($selectedOrderForReceipt->discount_amount, 0, ',', '.') }}</span>
+                            </div>
+                        @endif
+                        <div class="flex justify-between">
+                            <span>PPN (11%):</span>
+                            <span>{{ number_format($selectedOrderForReceipt->tax_amount, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="flex justify-between font-bold text-sm text-black border-t border-slate-300 pt-1">
+                            <span>TOTAL:</span>
+                            <span>Rp {{ number_format($selectedOrderForReceipt->total_amount, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Bayar ({{ strtoupper($selectedOrderForReceipt->payment_method) }}):</span>
+                            <span>{{ number_format($selectedOrderForReceipt->paid_amount, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Kembali:</span>
+                            <span>{{ number_format($selectedOrderForReceipt->change_amount, 0, ',', '.') }}</span>
+                        </div>
+                    </div>
+
+                    <div class="border-b border-dashed border-slate-400 my-2"></div>
+
+                    <div class="text-center text-[10px] text-slate-500">
+                        <p>Terima kasih atas kunjungan Anda!</p>
+                        <p>Powered by BrewPOS</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-2 pt-2 border-t border-slate-200">
+                    <button onclick="printOrderReceipt()" class="flex-1 py-2.5 bg-amber-800 hover:bg-amber-900 text-white rounded-xl font-sans font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                        <span>Cetak Struk</span>
+                    </button>
+                    <button wire:click="closeReceiptModal" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-sans font-bold text-xs transition-colors">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function printOrderReceipt() {
+                const printContents = document.getElementById('thermal-receipt-modal').innerHTML;
+                const printWindow = window.open('', '', 'width=380,height=600');
+                printWindow.document.write('<html><head><title>Struk Pembayaran - BrewPOS</title>');
+                printWindow.document.write('<style>');
+                printWindow.document.write('@page { size: 80mm auto; margin: 0; } body { font-family: monospace; font-size: 11px; padding: 14px; margin: 0; color: #000; } .text-center { text-align: center; } .flex { display: flex; } .justify-between { justify-content: space-between; } .font-bold { font-weight: bold; } .border-b { border-bottom: 1px dashed #555; } .my-2 { margin: 8px 0; } .space-y-0\\.5 > * + * { margin-top: 2px; } .space-y-1 > * + * { margin-top: 4px; } .space-y-3 > * + * { margin-top: 12px; } .uppercase { text-transform: uppercase; } .text-sm { font-size: 13px; } .text-\\[10px\\] { font-size: 10px; } .text-\\[11px\\] { font-size: 11px; } .italic { font-style: italic; } .pl-2 { padding-left: 8px; }');
+                printWindow.document.write('</style></head><body>');
+                printWindow.document.write(printContents);
+                printWindow.document.write('</body></html>');
+                printWindow.document.close();
+                printWindow.focus();
+                setTimeout(() => {
+                    printWindow.print();
+                    printWindow.close();
+                }, 300);
+            }
+        </script>
+    @endif
 </div>
