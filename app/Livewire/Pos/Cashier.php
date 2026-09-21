@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\Table;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Title;
@@ -15,30 +16,41 @@ use Livewire\Component;
 class Cashier extends Component
 {
     public $search = '';
+
     public $selectedCategory = null;
 
-    // Cart state
     public $cart = [];
 
-    // Order info state
     public $customerName = 'Guest';
+
     public $orderType = 'dine_in';
+
     public $selectedTableId = null;
 
-    // Checkout / Payment modal state
-    public $showPaymentModal = false;
-    public $showReceiptModal = false;
-    public $paymentMethod = 'cash';
-    public $paidAmount = 0;
-    public $discountAmount = 0;
-    public $taxRate = 0.11; // PPN 11%
+    public $showVariantModal = false;
 
-    // Last completed order for receipt
+    public $selectedProduct = null;
+
+    public $selectedVariants = [];
+
+    public $itemNotes = '';
+
+    public $showPaymentModal = false;
+
+    public $showReceiptModal = false;
+
+    public $paymentMethod = 'cash';
+
+    public $paidAmount = 0;
+
+    public $discountAmount = 0;
+
+    public $taxRate = 0.11;
+
     public $completedOrder = null;
 
     public function mount()
     {
-        // Select first available table by default if dine_in
         $firstTable = Table::where('status', 'available')->first();
         if ($firstTable) {
             $this->selectedTableId = $firstTable->id;
@@ -50,15 +62,84 @@ class Cashier extends Component
         $this->selectedCategory = $this->selectedCategory === $categoryId ? null : $categoryId;
     }
 
-    public function addToCart($productId)
+    public function selectProductForOrder($productId)
     {
-        $product = Product::find($productId);
-        // Do not add if product is unavailable or stock <= 0
-        if (!$product || !$product->is_available || $product->stock <= 0) {
+        $product = Product::with('variants')->find($productId);
+        if (! $product || ! $product->is_available || $product->stock <= 0) {
             return;
         }
 
-        $key = 'p_' . $product->id;
+        if ($product->variants->isNotEmpty()) {
+            $this->selectedProduct = $product;
+            $this->selectedVariants = [];
+            $this->itemNotes = '';
+
+            // Pick the first option of each variant group as default
+            $groups = $product->variants->groupBy('variant_group');
+            foreach ($groups as $groupName => $variants) {
+                $this->selectedVariants[$groupName] = $variants->first()->id;
+            }
+
+            $this->showVariantModal = true;
+
+            return;
+        }
+
+        $this->pushToCart($product, [], 0, '');
+    }
+
+    public function confirmVariantSelection()
+    {
+        if (! $this->selectedProduct) {
+            return;
+        }
+
+        $variantIds = array_values($this->selectedVariants);
+        $variants = ProductVariant::whereIn('id', $variantIds)->get();
+
+        $extraTotal = $variants->sum('extra_price');
+        $variantNames = $variants->pluck('name')->toArray();
+
+        $notesList = [];
+        if (! empty($variantNames)) {
+            $notesList[] = implode(', ', $variantNames);
+        }
+        if (! empty(trim($this->itemNotes))) {
+            $notesList[] = trim($this->itemNotes);
+        }
+        $finalNotes = implode(' | ', $notesList);
+
+        $this->pushToCart($this->selectedProduct, $variantIds, $extraTotal, $finalNotes);
+        $this->closeVariantModal();
+    }
+
+    public function closeVariantModal()
+    {
+        $this->showVariantModal = false;
+        $this->selectedProduct = null;
+        $this->selectedVariants = [];
+        $this->itemNotes = '';
+    }
+
+    public function getVariantModalPriceProperty()
+    {
+        if (! $this->selectedProduct) {
+            return 0;
+        }
+
+        $extra = 0;
+        if (! empty($this->selectedVariants)) {
+            $extra = (float) ProductVariant::whereIn('id', array_values($this->selectedVariants))->sum('extra_price');
+        }
+
+        return (float) $this->selectedProduct->price + $extra;
+    }
+
+    protected function pushToCart(Product $product, array $variantIds, float $extraTotal, string $notes)
+    {
+        $finalPrice = (float) $product->price + $extraTotal;
+        $variantHash = ! empty($variantIds) ? implode('_', $variantIds) : 'base';
+        $key = 'p_'.$product->id.'_'.md5($variantHash.$notes);
 
         if (isset($this->cart[$key])) {
             $this->cart[$key]['quantity'] += 1;
@@ -67,10 +148,10 @@ class Cashier extends Component
             $this->cart[$key] = [
                 'product_id' => $product->id,
                 'name' => $product->name,
-                'price' => (float) $product->price,
+                'price' => $finalPrice,
                 'quantity' => 1,
-                'notes' => '',
-                'subtotal' => (float) $product->price,
+                'notes' => $notes,
+                'subtotal' => $finalPrice,
             ];
         }
     }
@@ -106,12 +187,14 @@ class Cashier extends Component
     public function getTaxAmountProperty()
     {
         $subAfterDiscount = max(0, $this->subtotal - (float) $this->discountAmount);
+
         return $subAfterDiscount * $this->taxRate;
     }
 
     public function getTotalAmountProperty()
     {
         $subAfterDiscount = max(0, $this->subtotal - (float) $this->discountAmount);
+
         return $subAfterDiscount + $this->taxAmount;
     }
 
@@ -122,8 +205,10 @@ class Cashier extends Component
 
     public function openPaymentModal()
     {
-        if (empty($this->cart)) return;
-        $this->paidAmount = $this->totalAmount; // Default paid amount to total
+        if (empty($this->cart)) {
+            return;
+        }
+        $this->paidAmount = $this->totalAmount;
         $this->showPaymentModal = true;
     }
 
@@ -139,19 +224,19 @@ class Cashier extends Component
 
     public function processPayment()
     {
-        if (empty($this->cart)) return;
+        if (empty($this->cart)) {
+            return;
+        }
 
         if ($this->paymentMethod === 'cash' && (float) $this->paidAmount < $this->totalAmount) {
-            $this->addError('paidAmount', 'Jumlah pembayaran kurang dari total tagihan!');
+            $this->addError('paidAmount', 'Jumlah pembayaran kurang dari total tagihan.');
+
             return;
         }
 
         DB::beginTransaction();
         try {
-            // Generate Invoice Number
-            $invoiceNumber = 'TRX-' . date('Ymd') . '-' . str_pad(Order::whereDate('created_at', now())->count() + 1, 4, '0', STR_PAD_LEFT);
-
-            // Default cashier user
+            $invoiceNumber = 'TRX-'.date('Ymd').'-'.str_pad(Order::whereDate('created_at', now())->count() + 1, 4, '0', STR_PAD_LEFT);
             $userId = auth()->id() ?? 2;
 
             $order = Order::create([
@@ -182,11 +267,9 @@ class Cashier extends Component
                     'notes' => $item['notes'],
                 ]);
 
-                // Reduce stock
                 Product::where('id', $item['product_id'])->decrement('stock', $item['quantity']);
             }
 
-            // Update table status if occupied
             if ($this->orderType === 'dine_in' && $this->selectedTableId) {
                 Table::where('id', $this->selectedTableId)->update(['status' => 'occupied']);
             }
@@ -197,12 +280,11 @@ class Cashier extends Component
             $this->showPaymentModal = false;
             $this->showReceiptModal = true;
 
-            // Reset cart
             $this->cart = [];
             $this->customerName = 'Guest';
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->addError('payment', 'Gagal memproses transaksi: ' . $e->getMessage());
+            $this->addError('payment', 'Gagal memproses transaksi: '.$e->getMessage());
         }
     }
 
@@ -215,18 +297,16 @@ class Cashier extends Component
     public function render()
     {
         $categories = Category::where('is_active', true)->get();
-
-        // Query ALL products (including disabled/out of stock so cashier sees them)
-        $productsQuery = Product::query();
+        $productsQuery = Product::with('variants');
 
         if ($this->selectedCategory) {
             $productsQuery->where('category_id', $this->selectedCategory);
         }
 
-        if (!empty($this->search)) {
+        if (! empty($this->search)) {
             $productsQuery->where(function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%')
-                  ->orWhere('sku', 'like', '%' . $this->search . '%');
+                $q->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('sku', 'like', '%'.$this->search.'%');
             });
         }
 

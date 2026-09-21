@@ -44,14 +44,18 @@
                 @forelse($products as $product)
                     @php
                         $isOut = !$product->is_available || $product->stock <= 0;
+                        $hasVariants = $product->variants->isNotEmpty();
                     @endphp
-                    <div @if(!$isOut) wire:click="addToCart({{ $product->id }})" @endif
+                    <div @if(!$isOut) wire:click="selectProductForOrder({{ $product->id }})" @endif
                          class="group border rounded-2xl p-4 flex flex-col justify-between transition-all duration-200 relative overflow-hidden {{ $isOut ? 'bg-slate-100/90 border-slate-200 opacity-65 cursor-not-allowed select-none' : 'bg-white border-slate-200/80 hover:border-amber-500 cursor-pointer hover:-translate-y-0.5 hover:shadow-md' }}">
                         
-                        <!-- Badge status habis/kosong -->
                         @if($isOut)
                             <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-rose-600 text-white font-extrabold text-[10px] tracking-wider uppercase shadow-2xs z-10">
                                 HABIS / KOSONG
+                            </span>
+                        @elseif($hasVariants)
+                            <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-200 font-bold text-[10px] tracking-wider uppercase shadow-2xs z-10">
+                                ADA VARIAN
                             </span>
                         @endif
 
@@ -59,7 +63,6 @@
                             <!-- Product Icon / Image Card -->
                             <div class="w-full h-28 rounded-xl {{ $isOut ? 'bg-slate-200/70' : 'bg-amber-50 border border-amber-100 group-hover:bg-amber-100/60' }} mb-3 flex items-center justify-center relative overflow-hidden transition-colors">
                                 <div class="w-12 h-12 rounded-full {{ $isOut ? 'bg-slate-300 text-slate-500' : 'bg-white shadow-sm text-amber-700' }} flex items-center justify-center">
-                                    <!-- Coffee SVG -->
                                     <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
                                         <path d="M2,21V19H20V21H2M20,8V5H18V8H20M20,3A2,2 0 0,1 22,5V8A2,2 0 0,1 20,10H18V13A4,4 0 0,1 14,17H8A4,4 0 0,1 4,13V3H20M16,5H6V13A2,2 0 0,0 8,15H14A2,2 0 0,0 16,13V5Z"/>
                                     </svg>
@@ -166,9 +169,14 @@
             @forelse($cart as $key => $item)
                 <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col gap-2 relative">
                     <div class="flex items-start justify-between gap-2">
-                        <div>
+                        <div class="flex-1">
                             <h4 class="text-xs font-bold text-slate-900 leading-snug">{{ $item['name'] }}</h4>
-                            <p class="text-[11px] text-amber-800 font-extrabold mt-0.5">
+                            @if(!empty($item['notes']))
+                                <p class="text-[11px] text-slate-500 font-medium mt-0.5 bg-amber-50/80 px-2 py-0.5 rounded border border-amber-200/50 inline-block">
+                                    {{ $item['notes'] }}
+                                </p>
+                            @endif
+                            <p class="text-[11px] text-amber-800 font-extrabold mt-1">
                                 Rp {{ number_format($item['price'], 0, ',', '.') }}
                             </p>
                         </div>
@@ -236,6 +244,80 @@
             </button>
         </div>
     </div>
+
+    <!-- MODAL PILIH VARIAN & MODIFIERS -->
+    @if($showVariantModal && $selectedProduct)
+        <div class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div class="bg-white border border-slate-200 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-5">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div>
+                        <h3 class="text-base font-extrabold text-slate-900">{{ $selectedProduct->name }}</h3>
+                        <p class="text-xs text-slate-500">Pilih opsi varian dan catatan pesanan</p>
+                    </div>
+                    <button wire:click="closeVariantModal" class="text-slate-400 hover:text-slate-700">
+                        <svg class="w-5 h-5 fill-none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- Variant Options Grouped -->
+                <div class="space-y-4 max-h-80 overflow-y-auto p-1">
+                    @foreach($selectedProduct->variants->groupBy('variant_group') as $groupName => $groupVariants)
+                        <div class="space-y-2">
+                            <span class="text-xs font-bold text-slate-700 block uppercase tracking-wider text-[11px]">{{ $groupName }}</span>
+                            <div class="grid grid-cols-2 gap-2.5">
+                                @foreach($groupVariants as $v)
+                                    @php
+                                        $isSelected = ($selectedVariants[$groupName] ?? null) == $v->id;
+                                    @endphp
+                                    <button type="button" 
+                                            wire:click="$set('selectedVariants.{{ $groupName }}', {{ $v->id }})"
+                                            class="py-2.5 px-3 rounded-xl text-xs transition-all text-left flex items-center justify-between {{ $isSelected ? 'border-2 border-amber-700 bg-amber-50/80 text-amber-950 font-bold shadow-2xs' : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300 font-medium' }}">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-3.5 h-3.5 rounded-full border flex items-center justify-center {{ $isSelected ? 'border-amber-700 bg-amber-700' : 'border-slate-300 bg-white' }}">
+                                                @if($isSelected)
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+                                                @endif
+                                            </span>
+                                            <span>{{ $v->name }}</span>
+                                        </div>
+                                        @if($v->extra_price > 0)
+                                            <span class="text-[11px] text-amber-800 font-extrabold">+Rp {{ number_format($v->extra_price, 0, ',', '.') }}</span>
+                                        @else
+                                            <span class="text-[10px] text-slate-400">Rp 0</span>
+                                        @endif
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endforeach
+
+                    <!-- Custom Notes Input -->
+                    <div class="space-y-1.5 pt-3 border-t border-slate-100">
+                        <label class="text-xs font-bold text-slate-700 block">Catatan Khusus (Opsional)</label>
+                        <input type="text" 
+                               wire:model="itemNotes" 
+                               placeholder="Contoh: Kurangi gula, es sedikit, pisahkan sambal..." 
+                               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-amber-700 focus:bg-white">
+                    </div>
+                </div>
+
+                <!-- Price Preview & Confirm Button -->
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
+                    <div>
+                        <span class="text-[11px] text-slate-400 block font-medium">Total Harga Item</span>
+                        <span class="text-base font-extrabold text-amber-800">
+                            Rp {{ number_format($this->variantModalPrice, 0, ',', '.') }}
+                        </span>
+                    </div>
+
+                    <button wire:click="confirmVariantSelection" 
+                            class="py-2.5 px-5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs shadow-md shadow-amber-700/20 transition-all">
+                        Tambahkan ke Pesanan
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
 
     <!-- PAYMENT MODAL -->
     @if($showPaymentModal)
@@ -318,7 +400,6 @@
         <div class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
             <div class="bg-white text-slate-900 rounded-2xl w-full max-w-sm p-6 shadow-2xl space-y-4 font-mono text-xs border border-slate-200">
                 
-                <!-- Printable Receipt Content -->
                 <div id="thermal-receipt" class="space-y-3">
                     <div class="text-center space-y-1">
                         <h2 class="font-bold text-base text-black uppercase tracking-wider">BREWPOS COFFEE</h2>
@@ -340,9 +421,14 @@
                     <!-- Items -->
                     <div class="space-y-1">
                         @foreach($completedOrder->items as $item)
-                            <div class="flex justify-between">
-                                <span>{{ $item->product_name }} x{{ $item->quantity }}</span>
-                                <span>{{ number_format($item->subtotal, 0, ',', '.') }}</span>
+                            <div class="space-y-0.5">
+                                <div class="flex justify-between">
+                                    <span class="font-bold">{{ $item->product_name }} x{{ $item->quantity }}</span>
+                                    <span>{{ number_format($item->subtotal, 0, ',', '.') }}</span>
+                                </div>
+                                @if(!empty($item->notes))
+                                    <p class="text-[10px] text-slate-500 italic pl-2">({{ $item->notes }})</p>
+                                @endif
                             </div>
                         @endforeach
                     </div>
@@ -387,7 +473,6 @@
                     </div>
                 </div>
 
-                <!-- Print & Close Action Buttons -->
                 <div class="flex gap-2 pt-2 border-t border-slate-200">
                     <button onclick="window.print()" class="flex-1 py-2 bg-slate-900 text-white rounded-lg font-sans font-bold text-xs flex items-center justify-center gap-1">
                         <span>Cetak Struk</span>

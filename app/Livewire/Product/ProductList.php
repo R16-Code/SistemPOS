@@ -17,34 +17,107 @@ class ProductList extends Component
 
     // Modal state
     public $showFormModal = false;
+
     public $isEditMode = false;
+
     public $selectedProductId = null;
 
     // Form inputs
     public $name = '';
+
     public $sku = '';
+
     public $category_id = '';
+
     public $price = 0;
+
     public $stock = 0;
+
     public $description = '';
+
     public $is_available = true;
+
+    // Variant options state
+    public $hasVariants = false;
+
+    public $variants = [];
+
+    public function updatedHasVariants($value)
+    {
+        if ($value && empty($this->variants)) {
+            $this->addVariantRow();
+        }
+    }
+
+    public function addVariantRow($group = '', $name = '', $extraPrice = 0)
+    {
+        $this->variants[] = [
+            'variant_group' => $group,
+            'name' => $name,
+            'extra_price' => $extraPrice,
+        ];
+    }
+
+    public function removeVariantRow($index)
+    {
+        unset($this->variants[$index]);
+        $this->variants = array_values($this->variants);
+    }
+
+    public function addPreset($type)
+    {
+        $this->hasVariants = true;
+
+        if ($type === 'temperature') {
+            $this->addVariantRow('Suhu', 'Hot', 0);
+            $this->addVariantRow('Suhu', 'Ice', 2000);
+        } elseif ($type === 'size') {
+            $this->addVariantRow('Ukuran', 'Regular', 0);
+            $this->addVariantRow('Ukuran', 'Large', 4000);
+        } elseif ($type === 'sugar') {
+            $this->addVariantRow('Gula', 'Normal Sugar', 0);
+            $this->addVariantRow('Gula', 'Less Sugar', 0);
+        }
+    }
 
     protected function rules()
     {
-        return [
+        $rules = [
             'name' => 'required|string|max:255',
-            'sku' => 'required|string|max:100|unique:products,sku,' . $this->selectedProductId,
+            'sku' => 'required|string|max:100|unique:products,sku,'.$this->selectedProductId,
             'category_id' => 'required|exists:categories,id',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'description' => 'nullable|string',
             'is_available' => 'boolean',
+            'hasVariants' => 'boolean',
+        ];
+
+        if ($this->hasVariants) {
+            $rules['variants'] = 'required|array|min:1';
+            $rules['variants.*.variant_group'] = 'required|string|max:100';
+            $rules['variants.*.name'] = 'required|string|max:100';
+            $rules['variants.*.extra_price'] = 'required|numeric|min:0';
+        }
+
+        return $rules;
+    }
+
+    protected function messages()
+    {
+        return [
+            'variants.min' => 'Tambahkan minimal 1 baris opsi varian jika opsi varian diaktifkan.',
+            'variants.*.variant_group.required' => 'Grup varian wajib diisi (misal: Suhu atau Ukuran).',
+            'variants.*.name.required' => 'Nama opsi wajib diisi (misal: Hot, Ice, Large).',
+            'variants.*.extra_price.required' => 'Tambahan harga wajib diisi (isi 0 jika gratis).',
+            'variants.*.extra_price.numeric' => 'Tambahan harga harus berupa angka.',
+            'variants.*.extra_price.min' => 'Tambahan harga minimal 0.',
         ];
     }
 
     public function updatedCategoryId($value)
     {
-        if (!$this->isEditMode && $value) {
+        if (! $this->isEditMode && $value) {
             $this->generateSkuForCategory($value);
         }
     }
@@ -52,12 +125,14 @@ class ProductList extends Component
     public function generateSkuForCategory($categoryId)
     {
         $category = Category::find($categoryId);
-        if (!$category) return;
+        if (! $category) {
+            return;
+        }
 
         $name = strtolower($category->name);
         $prefix = 'PR';
 
-        if (str_contains($name, 'coffee') && !str_contains($name, 'non')) {
+        if (str_contains($name, 'coffee') && ! str_contains($name, 'non')) {
             $prefix = 'CF';
         } elseif (str_contains($name, 'non-coffee') || str_contains($name, 'non coffee')) {
             $prefix = 'NC';
@@ -70,26 +145,26 @@ class ProductList extends Component
         } else {
             $words = explode(' ', $name);
             if (count($words) >= 2) {
-                $prefix = strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1));
+                $prefix = strtoupper(substr($words[0], 0, 1).substr($words[1], 0, 1));
             } else {
                 $prefix = strtoupper(substr($name, 0, 2));
             }
         }
 
-        $existingSkus = Product::where('sku', 'like', $prefix . '-%')->pluck('sku')->toArray();
+        $existingSkus = Product::where('sku', 'like', $prefix.'-%')->pluck('sku')->toArray();
         $number = 1;
-        while (in_array($prefix . '-' . str_pad($number, 3, '0', STR_PAD_LEFT), $existingSkus)) {
+        while (in_array($prefix.'-'.str_pad($number, 3, '0', STR_PAD_LEFT), $existingSkus)) {
             $number++;
         }
 
-        $this->sku = $prefix . '-' . str_pad($number, 3, '0', STR_PAD_LEFT);
+        $this->sku = $prefix.'-'.str_pad($number, 3, '0', STR_PAD_LEFT);
     }
 
     public function openCreateModal()
     {
         $this->resetForm();
         $this->isEditMode = false;
-        
+
         $firstCat = Category::first();
         if ($firstCat) {
             $this->category_id = $firstCat->id;
@@ -101,7 +176,7 @@ class ProductList extends Component
 
     public function editProduct($id)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::with('variants')->findOrFail($id);
         $this->selectedProductId = $product->id;
         $this->name = $product->name;
         $this->sku = $product->sku;
@@ -109,7 +184,21 @@ class ProductList extends Component
         $this->price = (float) $product->price;
         $this->stock = $product->stock;
         $this->description = $product->description;
-        $this->is_available = $product->is_available;
+        $this->is_available = (bool) $product->is_available;
+
+        if ($product->variants->isNotEmpty()) {
+            $this->hasVariants = true;
+            $this->variants = $product->variants->map(function ($v) {
+                return [
+                    'variant_group' => $v->variant_group,
+                    'name' => $v->name,
+                    'extra_price' => (float) $v->extra_price,
+                ];
+            })->toArray();
+        } else {
+            $this->hasVariants = false;
+            $this->variants = [];
+        }
 
         $this->isEditMode = true;
         $this->showFormModal = true;
@@ -131,7 +220,7 @@ class ProductList extends Component
                 'is_available' => $this->is_available,
             ]);
         } else {
-            Product::create([
+            $product = Product::create([
                 'name' => $this->name,
                 'sku' => $this->sku,
                 'category_id' => $this->category_id,
@@ -142,6 +231,19 @@ class ProductList extends Component
             ]);
         }
 
+        if ($this->hasVariants) {
+            $product->variants()->delete();
+            foreach ($this->variants as $variant) {
+                $product->variants()->create([
+                    'variant_group' => trim($variant['variant_group']),
+                    'name' => trim($variant['name']),
+                    'extra_price' => (float) $variant['extra_price'],
+                ]);
+            }
+        } else {
+            $product->variants()->delete();
+        }
+
         $this->closeModal();
     }
 
@@ -149,7 +251,7 @@ class ProductList extends Component
     {
         $product = Product::findOrFail($id);
         $product->update([
-            'is_available' => !$product->is_available,
+            'is_available' => ! $product->is_available,
         ]);
     }
 
@@ -175,15 +277,17 @@ class ProductList extends Component
         $this->stock = 0;
         $this->description = '';
         $this->is_available = true;
+        $this->hasVariants = false;
+        $this->variants = [];
         $this->resetValidation();
     }
 
     public function render()
     {
-        $products = Product::with('category')
+        $products = Product::with(['category', 'variants'])
             ->where(function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%')
-                  ->orWhere('sku', 'like', '%' . $this->search . '%');
+                $q->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('sku', 'like', '%'.$this->search.'%');
             })
             ->latest()
             ->paginate(10);
