@@ -51,7 +51,7 @@ class ReportIndex extends Component
         $this->dateRange = 'custom';
     }
 
-    public function exportCsv()
+    public function exportExcel()
     {
         $ordersQuery = Order::with(['items', 'table', 'user']);
 
@@ -63,7 +63,10 @@ class ReportIndex extends Component
         }
 
         $orders = $ordersQuery->latest()->get();
-        $totalRevenue = $orders->sum('total_amount');
+        $totalSubtotal = (float) $orders->sum('subtotal');
+        $totalDiscount = (float) $orders->sum('discount_amount');
+        $totalTax = (float) $orders->sum('tax_amount');
+        $totalRevenue = (float) $orders->sum('total_amount');
         $totalOrders = $orders->count();
         $periodLabel = ($this->startDate && $this->endDate)
             ? "{$this->startDate} s/d {$this->endDate}"
@@ -81,80 +84,31 @@ class ReportIndex extends Component
         }
         $topProducts = $topProductsQuery->get();
 
-        $filename = 'Laporan-Penjualan-BrewPOS-'.date('Ymd-His').'.csv';
+        $filename = 'Laporan-Penjualan-BrewPOS-'.date('Ymd-His').'.xls';
 
-        return response()->streamDownload(function () use ($orders, $topProducts, $periodLabel, $totalRevenue, $totalOrders) {
-            $handle = fopen('php://output', 'w');
+        $content = view('reports.report-excel', [
+            'orders' => $orders,
+            'topProducts' => $topProducts,
+            'periodLabel' => $periodLabel,
+            'totalSubtotal' => $totalSubtotal,
+            'totalDiscount' => $totalDiscount,
+            'totalTax' => $totalTax,
+            'totalRevenue' => $totalRevenue,
+            'totalOrders' => $totalOrders,
+        ])->render();
 
-            fwrite($handle, "\xEF\xBB\xBF");
-
-            fputcsv($handle, ['LAPORAN PENJUALAN - BREWPOS COFFEE']);
-            fputcsv($handle, ['Periode', $periodLabel]);
-            fputcsv($handle, ['Waktu Ekspor', now()->format('d/m/Y H:i:s')]);
-            fputcsv($handle, ['Total Omset', 'Rp '.number_format($totalRevenue, 0, ',', '.')]);
-            fputcsv($handle, ['Total Transaksi', $totalOrders]);
-            fputcsv($handle, []);
-
-            fputcsv($handle, ['RINCIAN TRANSAKSI']);
-            fputcsv($handle, [
-                'No',
-                'Nomor Invoice',
-                'Tanggal',
-                'Waktu',
-                'Nama Pelanggan',
-                'Tipe Pesanan',
-                'Meja',
-                'Kasir',
-                'Metode Pembayaran',
-                'Status Pembayaran',
-                'Status Dapur',
-                'Subtotal (Rp)',
-                'Diskon (Rp)',
-                'PPN (Rp)',
-                'Total Akhir (Rp)',
-            ]);
-
-            $no = 1;
-            foreach ($orders as $order) {
-                fputcsv($handle, [
-                    $no++,
-                    $order->invoice_number,
-                    $order->created_at->format('Y-m-d'),
-                    $order->created_at->format('H:i:s'),
-                    $order->customer_name,
-                    strtoupper($order->order_type),
-                    $order->table ? $order->table->table_number : '-',
-                    $order->user ? $order->user->name : '-',
-                    strtoupper($order->payment_method),
-                    strtoupper($order->payment_status),
-                    strtoupper($order->order_status),
-                    $order->subtotal,
-                    $order->discount_amount,
-                    $order->tax_amount,
-                    $order->total_amount,
-                ]);
-            }
-
-            fputcsv($handle, []);
-
-            fputcsv($handle, ['REKAPITULASI PENJUALAN PRODUK']);
-            fputcsv($handle, ['No', 'Nama Menu', 'Kuantitas Terjual', 'Total Omset (Rp)']);
-
-            $pNo = 1;
-            foreach ($topProducts as $tp) {
-                fputcsv($handle, [
-                    $pNo++,
-                    $tp->product_name,
-                    $tp->total_qty,
-                    $tp->total_sales,
-                ]);
-            }
-
-            fclose($handle);
+        return response()->streamDownload(function () use ($content) {
+            echo "\xEF\xBB\xBF".$content;
         }, $filename, [
-            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Cache-Control' => 'max-age=0',
         ]);
+    }
+
+    public function exportCsv()
+    {
+        return $this->exportExcel();
     }
 
     public function render()
