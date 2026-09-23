@@ -49,6 +49,16 @@ class Cashier extends Component
 
     public $completedOrder = null;
 
+    public bool $showIncomingOrdersModal = false;
+
+    public ?int $selectedIncomingOrderId = null;
+
+    public ?int $lastAlertedOrderId = null;
+
+    public string $confirmPaymentMethod = 'cash';
+
+    public float $confirmPaidAmount = 0;
+
     public function mount()
     {
         $firstTable = Table::where('status', 'available')->first();
@@ -294,6 +304,115 @@ class Cashier extends Component
         $this->completedOrder = null;
     }
 
+    public function openIncomingOrdersModal(): void
+    {
+        $this->showIncomingOrdersModal = true;
+
+        $first = Order::where('order_source', 'qr_table')
+            ->where('order_status', 'pending_confirmation')
+            ->latest()
+            ->first();
+
+        if ($first) {
+            $this->selectIncomingOrder($first->id);
+        }
+    }
+
+    public function closeIncomingOrdersModal(): void
+    {
+        $this->showIncomingOrdersModal = false;
+        $this->selectedIncomingOrderId = null;
+    }
+
+    public function selectIncomingOrder(int $orderId): void
+    {
+        $this->selectedIncomingOrderId = $orderId;
+        $order = Order::find($orderId);
+        if ($order) {
+            $this->confirmPaidAmount = (float) $order->total_amount;
+            $this->confirmPaymentMethod = $order->payment_method === 'qris' ? 'qris' : 'cash';
+        }
+    }
+
+    public function setConfirmQuickMoney(float $amount): void
+    {
+        $this->confirmPaidAmount = $amount;
+    }
+
+    public function confirmIncomingOrder(int $orderId): void
+    {
+        $order = Order::with('items')->find($orderId);
+        if (! $order || $order->order_status !== 'pending_confirmation') {
+            return;
+        }
+
+        DB::beginTransaction();
+        try {
+            $isPaid = $order->payment_status === 'paid';
+            $paidAmount = $isPaid ? $order->paid_amount : ((float) $this->confirmPaidAmount ?: $order->total_amount);
+            $changeAmount = max(0, $paidAmount - (float) $order->total_amount);
+
+            $order->update([
+                'user_id' => auth()->id() ?? 1,
+                'payment_method' => $isPaid ? $order->payment_method : $this->confirmPaymentMethod,
+                'payment_status' => 'paid',
+                'order_status' => 'pending',
+                'paid_amount' => $paidAmount,
+                'change_amount' => $changeAmount,
+            ]);
+
+            if ($order->table_id) {
+                Table::where('id', $order->table_id)->update(['status' => 'occupied']);
+            }
+
+            DB::commit();
+
+            $this->selectedIncomingOrderId = null;
+            $this->dispatch('order-confirmed');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            $this->addError('incoming', 'Gagal mengonfirmasi pesanan: '.$e->getMessage());
+        }
+    }
+
+    public function rejectIncomingOrder(int $orderId): void
+    {
+        $order = Order::with('items')->find($orderId);
+        if (! $order || $order->order_status !== 'pending_confirmation') {
+            return;
+        }
+
+        DB::beginTransaction();
+        try {
+            foreach ($order->items as $item) {
+                if ($item->product_id) {
+                    Product::where('id', $item->product_id)->increment('stock', $item->quantity);
+                }
+            }
+
+            $order->update([
+                'order_status' => 'cancelled',
+            ]);
+
+            if ($order->table_id) {
+                $hasOtherOrders = Order::where('table_id', $order->table_id)
+                    ->whereIn('order_status', ['pending', 'cooking', 'ready'])
+                    ->exists();
+
+                if (! $hasOtherOrders) {
+                    Table::where('id', $order->table_id)->update(['status' => 'available']);
+                }
+            }
+
+            DB::commit();
+
+            $this->selectedIncomingOrderId = null;
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            $this->addError('incoming', 'Gagal membatalkan pesanan: '.$e->getMessage());
+        }
+    }
+
     public function render()
     {
         $categories = Category::where('is_active', true)
@@ -320,12 +439,28 @@ class Cashier extends Component
 
         $selectedCategoryModel = $this->selectedCategory ? Category::find($this->selectedCategory) : null;
 
+        $incomingOrders = Order::with(['table', 'items'])
+            ->where('order_source', 'qr_table')
+            ->where('order_status', 'pending_confirmation')
+            ->latest()
+            ->get();
+
+        if ($incomingOrders->isNotEmpty()) {
+            $latestIncoming = $incomingOrders->first();
+            if ($this->lastAlertedOrderId !== $latestIncoming->id) {
+                $this->lastAlertedOrderId = $latestIncoming->id;
+                $this->dispatch('play-order-chime');
+            }
+        }
+
         return view('livewire.pos.cashier', [
             'categories' => $categories,
             'totalProductsCount' => $totalProductsCount,
             'products' => $products,
             'tables' => $tables,
             'selectedCategoryModel' => $selectedCategoryModel,
+            'incomingOrders' => $incomingOrders,
+            'incomingOrdersCount' => $incomingOrders->count(),
         ]);
     }
 }

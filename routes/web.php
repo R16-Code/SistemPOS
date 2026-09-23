@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\ReportPrintController;
+use App\Http\Controllers\TablePrintController;
 use App\Livewire\Auth\Login;
+use App\Livewire\Customer\CustomerOrder;
+use App\Livewire\Customer\CustomerOrderStatus;
 use App\Livewire\Kitchen\KitchenOrders;
 use App\Livewire\Order\OrderList;
 use App\Livewire\Pos\Cashier;
@@ -11,6 +14,10 @@ use App\Livewire\Table\TableList;
 use App\Livewire\User\UserList;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+
+// Pelanggan: Self-Ordering via QR Meja (Tanpa Login)
+Route::get('/order/{token}', CustomerOrder::class)->name('customer.order');
+Route::get('/order/{token}/status/{invoice}', CustomerOrderStatus::class)->name('customer.order.status');
 
 // Tamu / Belum Login
 Route::get('/login', Login::class)->name('login')->middleware('guest');
@@ -29,6 +36,7 @@ Route::middleware(['auth'])->group(function () {
     // Kasir POS & Meja: Admin & Kasir
     Route::get('/', Cashier::class)->name('pos')->middleware('role:admin,cashier');
     Route::get('/tables', TableList::class)->name('tables')->middleware('role:admin,cashier');
+    Route::get('/tables/{table}/print-qr', [TablePrintController::class, 'printQr'])->name('tables.print-qr')->middleware('role:admin,cashier');
 
     // Antrian Dapur / Kitchen Display System: Admin & Kitchen
     Route::get('/kitchen', KitchenOrders::class)->name('kitchen')->middleware('role:admin,kitchen');

@@ -11,18 +11,26 @@ class TableList extends Component
 {
     // Modal state
     public $showModal = false;
+
     public $isEditMode = false;
+
     public $selectedTableId = null;
+
+    public bool $showQrModal = false;
+
+    public ?Table $selectedQrTable = null;
 
     // Form inputs
     public $table_number = '';
+
     public $capacity = 4;
+
     public $status = 'available';
 
     protected function rules()
     {
         return [
-            'table_number' => 'required|string|max:50|unique:tables,table_number,' . $this->selectedTableId,
+            'table_number' => 'required|string|max:50|unique:tables,table_number,'.$this->selectedTableId,
             'capacity' => 'required|integer|min:1|max:50',
             'status' => 'required|in:available,occupied,reserved',
         ];
@@ -35,7 +43,7 @@ class TableList extends Component
 
         // Auto suggest next table number
         $nextNum = Table::count() + 1;
-        $this->table_number = 'Meja ' . str_pad($nextNum, 2, '0', STR_PAD_LEFT);
+        $this->table_number = 'Meja '.str_pad($nextNum, 2, '0', STR_PAD_LEFT);
         $this->capacity = 4;
         $this->status = 'available';
 
@@ -89,6 +97,27 @@ class TableList extends Component
     {
         $table = Table::findOrFail($id);
         $table->delete();
+    }
+
+    public function openQrModal(int $id): void
+    {
+        $this->selectedQrTable = Table::findOrFail($id);
+        $this->showQrModal = true;
+    }
+
+    public function closeQrModal(): void
+    {
+        $this->showQrModal = false;
+        $this->selectedQrTable = null;
+    }
+
+    public function toggleTableSelfOrder(int $id): void
+    {
+        $table = Table::findOrFail($id);
+        $table->update(['is_active' => ! $table->is_active]);
+        if ($this->selectedQrTable && $this->selectedQrTable->id === $table->id) {
+            $this->selectedQrTable->refresh();
+        }
     }
 
     public function closeModal()
