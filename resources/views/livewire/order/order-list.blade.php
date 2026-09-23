@@ -32,15 +32,15 @@
     </div>
 
     <!-- Filter & Search Bar -->
-    <div class="flex items-center justify-between gap-4 flex-wrap">
-        <div class="relative w-72">
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div class="relative w-full sm:w-72">
             <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 fill-none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             <input type="text" wire:model.live.debounce.250ms="search" placeholder="Cari No Invoice / Pelanggan..." class="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-900 focus:outline-none focus:border-amber-700 shadow-2xs">
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
             <!-- Filter Status Pesanan Dapur -->
-            <select wire:model.live="orderStatus" class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-amber-700 shadow-2xs">
+            <select wire:model.live="orderStatus" class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-amber-700 shadow-2xs flex-1 sm:flex-none">
                 <option value="">Semua Status Dapur</option>
                 <option value="pending">Menunggu (Pending)</option>
                 <option value="cooking">Sedang Diracik (Cooking)</option>
@@ -49,7 +49,7 @@
             </select>
 
             <!-- Filter Status Pembayaran -->
-            <select wire:model.live="paymentStatus" class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-amber-700 shadow-2xs">
+            <select wire:model.live="paymentStatus" class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-amber-700 shadow-2xs flex-1 sm:flex-none">
                 <option value="">Semua Pembayaran</option>
                 <option value="paid">Lunas (Paid)</option>
                 <option value="pending">Belum Lunas (Pending)</option>
@@ -59,35 +59,25 @@
 
     <div class="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full table-fixed text-left text-xs text-slate-700">
-                <colgroup>
-                    <col class="w-[16%]">
-                    <col class="w-[11%]">
-                    <col class="w-[13%]">
-                    <col class="w-[20%]">
-                    <col class="w-[10%]">
-                    <col class="w-[11%]">
-                    <col class="w-[9%]">
-                    <col class="w-[10%]">
-                </colgroup>
+            <table class="w-full min-w-[980px] text-left text-xs text-slate-700">
                 <thead class="bg-slate-100/70 text-slate-600 border-b border-slate-200 font-bold uppercase tracking-wider text-[10px]">
                     <tr>
-                        <th class="px-3 py-3.5 whitespace-nowrap">Invoice</th>
-                        <th class="px-2.5 py-3.5 whitespace-nowrap">Waktu</th>
-                        <th class="px-3 py-3.5">Pelanggan & Meja</th>
-                        <th class="px-3 py-3.5">Menu Dipesan</th>
-                        <th class="px-3 py-3.5 text-right whitespace-nowrap">Total</th>
-                        <th class="px-2 py-3.5 text-center whitespace-nowrap">Status Dapur</th>
-                        <th class="px-2 py-3.5 text-center whitespace-nowrap">Pembayaran</th>
-                        <th class="px-2 py-3.5 text-center whitespace-nowrap">Aksi</th>
+                        <th class="px-4 py-3.5 whitespace-nowrap">Invoice</th>
+                        <th class="px-3 py-3.5 whitespace-nowrap">Waktu</th>
+                        <th class="px-4 py-3.5 min-w-[140px]">Pelanggan & Meja</th>
+                        <th class="px-4 py-3.5 min-w-[180px]">Menu Dipesan</th>
+                        <th class="px-4 py-3.5 text-right whitespace-nowrap">Total</th>
+                        <th class="px-3 py-3.5 text-center whitespace-nowrap">Status Dapur</th>
+                        <th class="px-3 py-3.5 text-center whitespace-nowrap">Pembayaran</th>
+                        <th class="px-3 py-3.5 text-center whitespace-nowrap">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse($orders as $order)
                         <tr class="hover:bg-slate-50/80 transition-colors">
-                            <td class="px-3 py-3 font-bold text-slate-900 font-mono whitespace-nowrap text-[11px]">{{ $order->invoice_number }}</td>
-                            <td class="px-2.5 py-3 text-slate-500 whitespace-nowrap text-[11px]">{{ $order->created_at->format('d/m/Y H:i') }}</td>
-                            <td class="px-3 py-3">
+                            <td class="px-4 py-3 font-bold text-slate-900 font-mono whitespace-nowrap text-[11px]">{{ $order->invoice_number }}</td>
+                            <td class="px-3 py-3 text-slate-500 whitespace-nowrap text-[11px]">{{ $order->created_at->format('d/m/Y H:i') }}</td>
+                            <td class="px-4 py-3">
                                 <span class="font-bold text-slate-900 block leading-tight truncate">{{ $order->customer_name }}</span>
                                 <span class="text-[10px] text-slate-500 capitalize">
                                     {{ $order->order_type }}
@@ -161,19 +151,19 @@
                             </td>
 
                             <!-- Status Pembayaran -->
-                            <td class="px-2 py-3 text-center whitespace-nowrap">
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider {{ $order->payment_status === 'paid' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}">
+                            <td class="px-3 py-3 text-center whitespace-nowrap">
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider {{ $order->payment_status === 'paid' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}">
                                     {{ $order->payment_status === 'paid' ? 'LUNAS' : 'PENDING' }}
                                 </span>
                                 <span class="text-[9px] text-slate-400 uppercase font-mono block mt-0.5">{{ $order->payment_method }}</span>
                             </td>
 
                             <!-- Aksi Cetak Ulang Struk -->
-                            <td class="px-2 py-3 text-center whitespace-nowrap">
+                            <td class="px-3 py-3 text-center whitespace-nowrap">
                                 <button wire:click="showReceipt({{ $order->id }})" 
                                         type="button" 
                                         title="Cetak Ulang Struk"
-                                        class="inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-amber-50 hover:text-amber-900 border border-slate-200/80 hover:border-amber-200 transition-all shadow-2xs cursor-pointer">
+                                        class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-amber-50 hover:text-amber-900 border border-slate-200/80 hover:border-amber-200 transition-all shadow-2xs cursor-pointer">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                                     <span>Struk</span>
                                 </button>
@@ -196,8 +186,8 @@
     <!-- MODAL RINCIAN PESANAN LENGKAP -->
     @if($showOrderDetailModal && $selectedOrderDetail)
         <div class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-slate-200 overflow-hidden space-y-4 p-6">
-                <div class="flex items-start justify-between border-b border-slate-100 pb-3">
+            <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh] p-6">
+                <div class="flex items-start justify-between border-b border-slate-100 pb-3 shrink-0">
                     <div>
                         <div class="flex items-center gap-2">
                             <h3 class="text-base font-black text-slate-900 font-mono">{{ $selectedOrderDetail->invoice_number }}</h3>
@@ -279,14 +269,14 @@
                 </div>
 
                 <!-- Modal Actions -->
-                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 shrink-0">
                     <button wire:click="showReceipt({{ $selectedOrderDetail->id }})" 
                             type="button" 
-                            class="px-4 py-2 bg-amber-800 hover:bg-amber-900 text-white rounded-xl text-xs font-bold transition-all inline-flex items-center gap-1.5 shadow-sm shadow-amber-800/20 cursor-pointer">
+                            class="min-h-[44px] px-4 py-2 bg-amber-800 hover:bg-amber-900 text-white rounded-xl text-xs font-bold transition-all inline-flex items-center gap-1.5 shadow-sm shadow-amber-800/20 cursor-pointer">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                         <span>Cetak Struk</span>
                     </button>
-                    <button wire:click="closeOrderDetailModal" type="button" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer">
+                    <button wire:click="closeOrderDetailModal" type="button" class="min-h-[44px] px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center justify-center">
                         Tutup
                     </button>
                 </div>
@@ -297,7 +287,7 @@
     <!-- MODAL CETAK STRUK THERMAL -->
     @if($showReceiptModal && $selectedOrderForReceipt)
         <div class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div class="bg-white text-slate-900 rounded-2xl w-full max-w-sm p-6 shadow-2xl space-y-4 font-mono text-xs border border-slate-200">
+            <div class="bg-white text-slate-900 rounded-2xl w-full max-w-sm p-6 shadow-2xl space-y-4 font-mono text-xs border border-slate-200 max-h-[85vh] overflow-y-auto">
                 
                 <div id="thermal-receipt-modal" class="space-y-3">
                     <div class="text-center space-y-1">

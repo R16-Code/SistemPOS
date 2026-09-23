@@ -1,14 +1,14 @@
 <div class="p-6 space-y-6 overflow-y-auto h-full bg-slate-50">
-    <div class="flex items-center justify-between gap-4">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Manajemen Menu & Produk</h2>
             <p class="text-xs text-slate-500 mt-1">Tambah, ubah, atau nonaktifkan status ketersediaan menu cafe</p>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <input type="text" wire:model.live.debounce.250ms="search" placeholder="Cari nama produk / SKU..." class="bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs text-slate-900 focus:outline-none focus:border-amber-700 shadow-2xs">
             
-            <button wire:click="openCreateModal" class="px-4 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs shadow-md shadow-amber-700/20 flex items-center gap-1.5 transition-all">
+            <button wire:click="openCreateModal" class="min-h-[44px] px-4 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs shadow-md shadow-amber-700/20 flex items-center justify-center gap-1.5 transition-all">
                 <svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                 <span>Tambah Produk</span>
             </button>
@@ -16,7 +16,8 @@
     </div>
 
     <div class="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm">
-        <table class="w-full text-left text-xs text-slate-700">
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[700px] text-left text-xs text-slate-700">
             <thead class="bg-slate-100/70 text-slate-600 border-b border-slate-200 font-bold uppercase tracking-wider text-[11px]">
                 <tr>
                     <th class="px-6 py-4">SKU</th>
@@ -70,6 +71,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
 
         <div class="p-4 border-t border-slate-100">
             {{ $products->links() }}
@@ -85,7 +87,7 @@
                     <h3 class="text-base font-extrabold text-slate-900">
                         {{ $isEditMode ? 'Edit Produk' : 'Tambah Produk Baru' }}
                     </h3>
-                    <button wire:click="closeModal" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition-colors">
+                    <button wire:click="closeModal" class="text-slate-400 hover:text-slate-700 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors">
                         <svg class="w-5 h-5 fill-none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>

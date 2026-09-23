@@ -1,4 +1,4 @@
-<div class="flex-1 flex flex-col pb-24 relative bg-slate-50 min-h-screen">
+<div class="flex-1 flex flex-col pb-32 relative bg-slate-50 min-h-screen">
     <!-- Top Header -->
     <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-slate-200 px-4 py-3 shadow-xs">
         <div class="flex items-center justify-between gap-3 mb-2.5">
@@ -18,7 +18,7 @@
             <div class="flex items-center gap-2 shrink-0">
                 @if($this->activeOrders->isNotEmpty())
                     <a href="{{ route('customer.order.status', ['token' => $token, 'invoice' => $this->activeOrders->first()->invoice_number]) }}"
-                       class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-amber-900 text-amber-100 hover:bg-amber-800 border border-amber-700/80 text-xs font-bold transition-all shadow-xs active:scale-95">
+                       class="inline-flex items-center gap-1.5 min-h-[44px] px-3 py-1.5 rounded-full bg-amber-900 text-amber-100 hover:bg-amber-800 border border-amber-700/80 text-xs font-bold transition-all shadow-xs active:scale-95">
                         <span class="relative flex h-2 w-2">
                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                             <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -27,7 +27,7 @@
                     </a>
                 @endif
 
-                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200/80 text-amber-900 text-xs font-bold">
+                <div class="inline-flex items-center gap-1.5 min-h-[44px] px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200/80 text-amber-900 text-xs font-bold">
                     <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                     <span>{{ $table->table_number }}</span>
                 </div>
@@ -36,17 +36,19 @@
 
         <!-- Search Bar -->
         <div class="relative">
-            <input type="text"
+            <input type="search"
+                   inputmode="search"
+                   autocomplete="off"
                    wire:model.live.debounce.300ms="search"
                    placeholder="Cari kopi, camilan, minuman..."
-                   class="w-full pl-9 pr-8 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:bg-white transition-all">
-            <div class="absolute left-3 top-2.5 text-slate-400 pointer-events-none">
+                   class="w-full pl-9 pr-10 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:bg-white transition-all">
+            <div class="absolute left-3 top-3 text-slate-400 pointer-events-none">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
             </div>
             @if(!empty($search))
-                <button type="button" wire:click="$set('search', '')" class="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 p-1">
+                <button type="button" wire:click="$set('search', '')" class="absolute right-1 top-1 bottom-1 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-slate-600">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
@@ -59,13 +61,13 @@
     <div class="sticky top-[105px] z-20 bg-slate-50/95 backdrop-blur-xs px-4 py-2.5 border-b border-slate-200 overflow-x-auto no-scrollbar flex items-center gap-2">
         <button type="button"
                 wire:click="selectCategory(null)"
-                class="min-h-[38px] px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 {{ is_null($selectedCategory) ? 'bg-amber-800 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100' }}">
+                class="min-h-[44px] px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 {{ is_null($selectedCategory) ? 'bg-amber-800 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100' }}">
             Semua Menu
         </button>
         @foreach($categories as $cat)
             <button type="button"
                     wire:click="selectCategory({{ $cat->id }})"
-                    class="min-h-[38px] px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 {{ $selectedCategory === $cat->id ? 'bg-amber-800 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100' }}">
+                    class="min-h-[44px] px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 {{ $selectedCategory === $cat->id ? 'bg-amber-800 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100' }}">
                 {{ $cat->name }}
             </button>
         @endforeach
@@ -127,7 +129,7 @@
                         </div>
 
                         <a href="{{ route('customer.order.status', ['token' => $token, 'invoice' => $activeOrder->invoice_number]) }}"
-                           class="min-h-[38px] px-3.5 rounded-xl bg-amber-600 hover:bg-amber-500 active:scale-95 text-white text-xs font-bold shrink-0 flex items-center gap-1 shadow-sm transition-all whitespace-nowrap border border-amber-500/50">
+                           class="min-h-[44px] px-4 rounded-xl bg-amber-600 hover:bg-amber-500 active:scale-95 text-white text-xs font-bold shrink-0 flex items-center gap-1.5 shadow-sm transition-all whitespace-nowrap border border-amber-500/50">
                             <span>Lihat Status</span>
                             <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
@@ -367,19 +369,19 @@
                                     </p>
                                 </div>
 
-                                <!-- Quantity Controls -->
-                                <div class="flex items-center gap-1.5 shrink-0 bg-white border border-slate-200 rounded-xl p-1 shadow-2xs">
+                                <!-- Quantity Controls (44x44px minimal touch target) -->
+                                <div class="flex items-center gap-1 shrink-0 bg-white border border-slate-200 rounded-2xl p-0.5 shadow-2xs">
                                     <button type="button"
                                             wire:click="updateQuantity('{{ $key }}', -1)"
-                                            class="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold">
+                                            class="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-base font-bold active:scale-95 transition-all">
                                         -
                                     </button>
-                                    <span class="w-6 text-center text-xs font-extrabold text-slate-800">
+                                    <span class="w-7 text-center text-xs font-black text-slate-800">
                                         {{ $item['quantity'] }}
                                     </span>
                                     <button type="button"
                                             wire:click="updateQuantity('{{ $key }}', 1)"
-                                            class="w-7 h-7 flex items-center justify-center rounded-lg bg-amber-800 hover:bg-amber-900 text-white text-sm font-bold">
+                                            class="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-amber-800 hover:bg-amber-900 text-white text-base font-bold active:scale-95 transition-all">
                                         +
                                     </button>
                                 </div>
@@ -399,6 +401,8 @@
                             </label>
                             <input type="text"
                                    wire:model="customerName"
+                                   autocomplete="name"
+                                   autocorrect="off"
                                    placeholder="Masukkan nama Anda..."
                                    class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600">
                             @error('customerName')
@@ -411,6 +415,8 @@
                                 No. WhatsApp / HP (Opsional)
                             </label>
                             <input type="tel"
+                                   inputmode="numeric"
+                                   autocomplete="tel"
                                    wire:model="customerPhone"
                                    placeholder="Contoh: 08123456789"
                                    class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600">

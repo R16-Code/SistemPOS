@@ -5,7 +5,7 @@
             <p class="text-xs text-slate-500 mt-1">Kelola akun staf cafe, hak akses peran (Admin, Kasir, Dapur), dan status keaktifan</p>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
             <input type="text" 
                    wire:model.live.debounce.250ms="search" 
                    placeholder="Cari nama / email..." 
@@ -20,7 +20,7 @@
 
             <button type="button" 
                     wire:click="openCreateModal" 
-                    class="px-4 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs shadow-md shadow-amber-700/20 flex items-center gap-1.5 transition-all">
+                    class="min-h-[44px] px-4 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs shadow-md shadow-amber-700/20 flex items-center justify-center gap-1.5 transition-all">
                 <svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                 <span>Tambah Pengguna</span>
             </button>
@@ -28,7 +28,8 @@
     </div>
 
     <div class="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm">
-        <table class="w-full text-left text-xs text-slate-700">
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[650px] text-left text-xs text-slate-700">
             <thead class="bg-slate-100/70 text-slate-600 border-b border-slate-200 font-bold uppercase tracking-wider text-[11px]">
                 <tr>
                     <th class="px-6 py-4">Nama Lengkap</th>
@@ -100,6 +101,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
 
         <div class="p-4 border-t border-slate-100">
             {{ $users->links() }}
@@ -109,17 +111,17 @@
     <!-- FORM MODAL (TAMBAH / EDIT PENGGUNA) -->
     @if($showFormModal)
         <div class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-            <div class="bg-white border border-slate-200 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col">
-                <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4 bg-slate-50/50">
+            <div class="bg-white border border-slate-200 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+                <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4 bg-slate-50/50 shrink-0">
                     <h3 class="text-base font-extrabold text-slate-900">
                         {{ $isEditMode ? 'Edit Pengguna / Staf' : 'Tambah Pengguna Baru' }}
                     </h3>
-                    <button type="button" wire:click="closeModal" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition-colors">
+                    <button type="button" wire:click="closeModal" class="text-slate-400 hover:text-slate-700 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors">
                         <svg class="w-5 h-5 fill-none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
 
-                <form wire:submit.prevent="saveUser" class="p-6 space-y-4 text-xs">
+                <form wire:submit.prevent="saveUser" class="p-6 space-y-4 text-xs overflow-y-auto flex-1">
                     <div>
                         <label class="font-bold text-slate-700 block mb-1">Nama Lengkap</label>
                         <input type="text" wire:model="name" placeholder="Contoh: Sarah Barista" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:outline-none focus:border-amber-700">

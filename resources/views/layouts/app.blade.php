@@ -15,23 +15,83 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
     </style>
 </head>
-<body class="h-full font-sans antialiased bg-slate-100 text-slate-800 flex overflow-hidden">
+<body x-data="{ mobileSidebarOpen: false }" class="h-full font-sans antialiased bg-slate-100 text-slate-800 flex flex-col xl:flex-row overflow-hidden">
 
-    <!-- Sidebar Navigation (Light Mode) -->
-    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between shrink-0 shadow-sm z-10">
-        <div>
-            <!-- Brand / Logo -->
-            <div class="h-16 flex items-center px-6 border-b border-slate-100 gap-3">
-                <div class="w-10 h-10 rounded-xl bg-amber-700 flex items-center justify-center shadow-sm text-white">
-                    <!-- Coffee SVG Icon -->
-                    <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+    <!-- Mobile & Tablet Backdrop Overlay -->
+    <div x-show="mobileSidebarOpen" 
+         x-transition:enter="transition-opacity ease-linear duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity ease-linear duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @click="mobileSidebarOpen = false" 
+         class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-40 xl:hidden"
+         x-cloak
+         style="display: none;"></div>
+
+    <!-- Mobile & Tablet Top Navigation Bar (Visible on < xl) -->
+    <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 shrink-0 xl:hidden z-30 shadow-2xs">
+        <div class="flex items-center gap-3">
+            <button type="button" 
+                    @click="mobileSidebarOpen = true"
+                    class="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 active:scale-95 transition-all cursor-pointer"
+                    aria-label="Buka Menu Navigasi">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-amber-700 flex items-center justify-center text-white shadow-xs">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
                         <path d="M2,21V19H20V21H2M20,8V5H18V8H20M20,3A2,2 0 0,1 22,5V8A2,2 0 0,1 20,10H18V13A4,4 0 0,1 14,17H8A4,4 0 0,1 4,13V3H20M16,5H6V13A2,2 0 0,0 8,15H14A2,2 0 0,0 16,13V5Z"/>
                     </svg>
                 </div>
                 <div>
-                    <h1 class="font-extrabold text-lg text-slate-900 leading-tight tracking-tight">BrewPOS</h1>
-                    <p class="text-xs text-amber-700 font-semibold">Coffee Shop Kasir</p>
+                    <h1 class="font-extrabold text-base text-slate-900 leading-tight">BrewPOS</h1>
+                    <p class="text-[10px] text-amber-700 font-semibold leading-none">Coffee Shop Kasir</p>
                 </div>
+            </div>
+        </div>
+
+        @php
+            $authUser = auth()->user();
+            $userInitials = $authUser ? strtoupper(substr($authUser->name, 0, 2)) : 'US';
+        @endphp
+        <div class="flex items-center gap-2">
+            <span class="text-xs font-semibold text-slate-600 hidden sm:inline">{{ $authUser->name ?? 'User' }}</span>
+            <div class="w-9 h-9 rounded-full bg-amber-100 text-amber-900 border border-amber-200 flex items-center justify-center font-bold text-xs shadow-2xs">
+                {{ $userInitials }}
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar Navigation (Off-canvas drawer on mobile & tablet, static on desktop xl:) -->
+    <aside :class="mobileSidebarOpen ? 'is-open' : 'is-closed'"
+           class="sidebar-drawer fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col justify-between shrink-0 shadow-2xl xl:shadow-sm xl:static xl:transform-none">
+        <div>
+            <!-- Brand / Logo & Close Button -->
+            <div class="h-16 flex items-center justify-between px-6 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-700 flex items-center justify-center shadow-sm text-white">
+                        <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+                            <path d="M2,21V19H20V21H2M20,8V5H18V8H20M20,3A2,2 0 0,1 22,5V8A2,2 0 0,1 20,10H18V13A4,4 0 0,1 14,17H8A4,4 0 0,1 4,13V3H20M16,5H6V13A2,2 0 0,0 8,15H14A2,2 0 0,0 16,13V5Z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="font-extrabold text-lg text-slate-900 leading-tight tracking-tight">BrewPOS</h1>
+                        <p class="text-xs text-amber-700 font-semibold">Coffee Shop Kasir</p>
+                    </div>
+                </div>
+
+                <!-- Close button for drawer (visible on < xl) -->
+                <button type="button" 
+                        @click="mobileSidebarOpen = false" 
+                        class="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-700 active:scale-95 transition-all xl:hidden cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
             </div>
 
             <!-- Navigation Links -->

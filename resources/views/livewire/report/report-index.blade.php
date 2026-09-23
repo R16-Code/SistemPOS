@@ -1,8 +1,8 @@
-<div class="p-6 space-y-6 overflow-y-auto h-full bg-slate-50">
+<div class="p-4 sm:p-6 space-y-6 overflow-y-auto h-full bg-slate-50">
     <!-- Header & Action Controls -->
-    <div class="flex items-center justify-between gap-4 flex-wrap">
+    <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
         <div>
-            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Laporan & Analitik Penjualan</h2>
+            <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Laporan & Analitik Penjualan</h2>
             <p class="text-xs text-slate-500 mt-1">Ringkasan performa finansial, tren penjualan, dan ekspor laporan kafe</p>
         </div>
 
@@ -267,7 +267,7 @@
         </div>
         
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-700">
+            <table class="w-full min-w-[550px] text-left text-xs text-slate-700">
                 <thead class="bg-slate-100/70 text-slate-600 border-b border-slate-200 font-bold uppercase tracking-wider text-[11px]">
                     <tr>
                         <th class="px-5 py-3 w-12 text-center">No</th>

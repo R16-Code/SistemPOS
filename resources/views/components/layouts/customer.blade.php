@@ -14,6 +14,9 @@
     @livewireStyles
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        button, a, input, select, textarea {
+            touch-action: manipulation;
+        }
     </style>
 </head>
 <body class="min-h-full bg-slate-100 antialiased text-slate-800 flex justify-center selection:bg-amber-100 selection:text-amber-900">
