@@ -161,26 +161,26 @@
 
                 <!-- Card Footer & Action Buttons -->
                 <div class="p-3.5 border-t border-slate-100 bg-slate-50/60 flex items-center justify-between gap-2">
-                    <div>
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Status</span>
+                    <div class="shrink-0">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Status</span>
                         @if($order->order_status === 'pending')
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                                Menunggu
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold whitespace-nowrap bg-amber-100 text-amber-800 border border-amber-200">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+                                <span>Menunggu</span>
                             </span>
                         @elseif($order->order_status === 'cooking')
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
-                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
-                                Sedang Diracik
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold whitespace-nowrap bg-blue-100 text-blue-800 border border-blue-200">
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse shrink-0"></span>
+                                <span>Sedang Diracik</span>
                             </span>
                         @elseif($order->order_status === 'ready')
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                Siap Saji
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold whitespace-nowrap bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+                                <span>Siap Saji</span>
                             </span>
                         @else
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                                Selesai
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold whitespace-nowrap bg-slate-100 text-slate-600 border border-slate-200">
+                                <span>Selesai</span>
                             </span>
                         @endif
                     </div>

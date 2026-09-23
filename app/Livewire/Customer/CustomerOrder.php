@@ -8,6 +8,7 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Table;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -193,6 +194,16 @@ class CustomerOrder extends Component
     public function getTotalItemsCountProperty(): int
     {
         return (int) array_sum(array_column($this->cart, 'quantity'));
+    }
+
+    public function getActiveOrdersProperty(): Collection
+    {
+        return Order::with(['items'])
+            ->where('table_id', $this->table->id)
+            ->where('created_at', '>=', now()->subHours(12))
+            ->whereIn('order_status', ['pending_confirmation', 'pending', 'cooking', 'ready'])
+            ->latest('id')
+            ->get();
     }
 
     public function openCart(): void

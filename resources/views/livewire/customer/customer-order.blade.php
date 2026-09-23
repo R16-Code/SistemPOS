@@ -14,10 +14,23 @@
                 </div>
             </div>
 
-            <!-- Table Badge -->
-            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200/80 text-amber-900 text-xs font-bold shrink-0">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>{{ $table->table_number }}</span>
+            <!-- Table & Active Order Badge -->
+            <div class="flex items-center gap-2 shrink-0">
+                @if($this->activeOrders->isNotEmpty())
+                    <a href="{{ route('customer.order.status', ['token' => $token, 'invoice' => $this->activeOrders->first()->invoice_number]) }}"
+                       class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-amber-900 text-amber-100 hover:bg-amber-800 border border-amber-700/80 text-xs font-bold transition-all shadow-xs active:scale-95">
+                        <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                        <span>Pesanan Aktif</span>
+                    </a>
+                @endif
+
+                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200/80 text-amber-900 text-xs font-bold">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span>{{ $table->table_number }}</span>
+                </div>
             </div>
         </div>
 
@@ -57,6 +70,74 @@
             </button>
         @endforeach
     </div>
+
+    <!-- Active Orders Alert Banner (if any active order on this table) -->
+    @if($this->activeOrders->isNotEmpty())
+        <div wire:poll.5s class="px-4 pt-3 space-y-2.5">
+            @foreach($this->activeOrders as $activeOrder)
+                @php
+                    $statusConfig = [
+                        'pending_confirmation' => [
+                            'label' => 'Menunggu Kasir',
+                            'badge' => 'bg-amber-400/20 text-amber-200 border-amber-400/30',
+                            'dot' => 'bg-amber-400 animate-pulse',
+                        ],
+                        'pending' => [
+                            'label' => 'Antrian Dapur',
+                            'badge' => 'bg-blue-400/20 text-blue-200 border-blue-400/30',
+                            'dot' => 'bg-blue-400',
+                        ],
+                        'cooking' => [
+                            'label' => 'Sedang Diracik',
+                            'badge' => 'bg-blue-400/25 text-blue-100 border-blue-400/40',
+                            'dot' => 'bg-blue-400 animate-pulse',
+                        ],
+                        'ready' => [
+                            'label' => 'Siap Saji',
+                            'badge' => 'bg-emerald-400/25 text-emerald-100 border-emerald-400/40',
+                            'dot' => 'bg-emerald-400 animate-ping',
+                        ],
+                    ];
+                    $cfg = $statusConfig[$activeOrder->order_status] ?? [
+                        'label' => 'Diproses',
+                        'badge' => 'bg-white/10 text-white border-white/20',
+                        'dot' => 'bg-white',
+                    ];
+                @endphp
+                <div class="bg-gradient-to-br from-slate-900 via-amber-950 to-slate-900 text-white rounded-2xl p-3.5 shadow-md border border-amber-800/40 relative overflow-hidden">
+                    <div class="flex items-center justify-between gap-3 relative z-10">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div class="w-10 h-10 rounded-xl bg-amber-800/70 border border-amber-600/40 flex items-center justify-center shrink-0 shadow-inner text-amber-300">
+                                <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <span class="text-xs font-black tracking-wide text-white">{{ $activeOrder->invoice_number }}</span>
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border whitespace-nowrap {{ $cfg['badge'] }}">
+                                        <span class="w-1.5 h-1.5 rounded-full {{ $cfg['dot'] }} shrink-0"></span>
+                                        <span>{{ $cfg['label'] }}</span>
+                                    </span>
+                                </div>
+                                <p class="text-[11px] text-amber-200/80 truncate mt-0.5">
+                                    {{ $activeOrder->customer_name }} • {{ $activeOrder->items->count() }} menu • Rp {{ number_format($activeOrder->total_amount, 0, ',', '.') }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <a href="{{ route('customer.order.status', ['token' => $token, 'invoice' => $activeOrder->invoice_number]) }}"
+                           class="min-h-[38px] px-3.5 rounded-xl bg-amber-600 hover:bg-amber-500 active:scale-95 text-white text-xs font-bold shrink-0 flex items-center gap-1 shadow-sm transition-all whitespace-nowrap border border-amber-500/50">
+                            <span>Lihat Status</span>
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    @endif
 
     <!-- Inactive Table Banner (if deactivated by admin) -->
     @if(!$table->is_active)

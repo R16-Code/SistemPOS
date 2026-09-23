@@ -1,4 +1,20 @@
-<div wire:poll.4s class="flex-1 flex flex-col p-4 space-y-4 bg-slate-50 min-h-screen pb-12">
+<div wire:poll.4s 
+     x-data="{
+         init() {
+             this.syncStorage();
+         },
+         syncStorage() {
+             try {
+                 const isFinished = {{ in_array($order->order_status, ['completed', 'cancelled']) ? 'true' : 'false' }};
+                 if (isFinished) {
+                     localStorage.removeItem('brewpos_active_order_{{ $token }}');
+                 } else {
+                     localStorage.setItem('brewpos_active_order_{{ $token }}', '{{ $order->invoice_number }}');
+                 }
+             } catch (e) {}
+         }
+     }"
+     class="flex-1 flex flex-col p-4 space-y-4 bg-slate-50 min-h-screen pb-12">
     <!-- Top Header Navigation -->
     <div class="flex items-center justify-between gap-3 pt-2">
         <a href="{{ route('customer.order', $token) }}"
