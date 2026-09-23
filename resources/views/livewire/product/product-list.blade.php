@@ -17,27 +17,27 @@
 
     <div class="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm">
         <div class="overflow-x-auto">
-            <table class="w-full min-w-[700px] text-left text-xs text-slate-700">
+            <table class="w-full min-w-[780px] text-left text-xs text-slate-700">
             <thead class="bg-slate-100/70 text-slate-600 border-b border-slate-200 font-bold uppercase tracking-wider text-[11px]">
                 <tr>
-                    <th class="px-6 py-4">SKU</th>
-                    <th class="px-6 py-4">Nama Produk</th>
-                    <th class="px-6 py-4">Kategori</th>
-                    <th class="px-6 py-4">Harga</th>
-                    <th class="px-6 py-4">Stok</th>
-                    <th class="px-6 py-4 text-center">Status</th>
-                    <th class="px-6 py-4 text-center">Aksi</th>
+                    <th class="px-5 py-3.5 whitespace-nowrap">SKU</th>
+                    <th class="px-5 py-3.5 min-w-[200px]">Nama Produk</th>
+                    <th class="px-5 py-3.5 whitespace-nowrap">Kategori</th>
+                    <th class="px-5 py-3.5 whitespace-nowrap">Harga</th>
+                    <th class="px-5 py-3.5 whitespace-nowrap">Stok</th>
+                    <th class="px-5 py-3.5 whitespace-nowrap text-center">Status</th>
+                    <th class="px-5 py-3.5 whitespace-nowrap text-center">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
                 @forelse($products as $p)
                     <tr class="hover:bg-slate-50/80 transition-colors">
-                        <td class="px-6 py-4 font-mono font-bold text-amber-800">{{ $p->sku }}</td>
-                        <td class="px-6 py-4">
+                        <td class="px-5 py-4 whitespace-nowrap font-mono font-bold text-amber-800">{{ $p->sku }}</td>
+                        <td class="px-5 py-4 min-w-[200px]">
                             <span class="font-bold text-slate-900 block">{{ $p->name }}</span>
                             @if($p->variants->isNotEmpty())
                                 <div class="flex items-center gap-1.5 mt-1 flex-wrap">
-                                    <span class="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                                    <span class="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 whitespace-nowrap">
                                         <svg class="w-3 h-3 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
                                         <span>{{ $p->variants->count() }} Varian ({{ $p->variants->pluck('variant_group')->unique()->implode(', ') }})</span>
                                     </span>
@@ -45,20 +45,20 @@
                             @endif
                             <span class="text-[11px] text-slate-400 line-clamp-1 mt-0.5">{{ $p->description }}</span>
                         </td>
-                        <td class="px-6 py-4 font-medium text-slate-600">{{ $p->category->name ?? '-' }}</td>
-                        <td class="px-6 py-4 font-extrabold text-slate-900">Rp {{ number_format($p->price, 0, ',', '.') }}</td>
-                        <td class="px-6 py-4 text-slate-800 font-mono font-bold">{{ $p->stock }}</td>
-                        <td class="px-6 py-4 text-center">
-                            <button wire:click="toggleAvailable({{ $p->id }})" title="Klik untuk mengubah status" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all shadow-2xs border {{ $p->is_available ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100' }}">
+                        <td class="px-5 py-4 whitespace-nowrap font-medium text-slate-600">{{ $p->category->name ?? '-' }}</td>
+                        <td class="px-5 py-4 whitespace-nowrap font-extrabold text-slate-900">Rp {{ number_format($p->price, 0, ',', '.') }}</td>
+                        <td class="px-5 py-4 whitespace-nowrap text-slate-800 font-mono font-bold">{{ $p->stock }}</td>
+                        <td class="px-5 py-4 whitespace-nowrap text-center">
+                            <button wire:click="toggleAvailable({{ $p->id }})" title="Klik untuk mengubah status" class="inline-flex items-center px-3 py-1 rounded-full text-[10px] sm:text-[11px] font-bold transition-all shadow-2xs border whitespace-nowrap {{ $p->is_available ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100' }}">
                                 {{ $p->is_available ? 'TERSEDIA' : 'HABIS' }}
                             </button>
                         </td>
-                        <td class="px-6 py-4 text-center">
-                            <div class="flex items-center justify-center gap-2">
-                                <button wire:click="editProduct({{ $p->id }})" class="p-1.5 rounded-lg bg-slate-100 hover:bg-amber-100 text-slate-700 hover:text-amber-800 font-bold transition-colors">
+                        <td class="px-5 py-4 whitespace-nowrap text-center">
+                            <div class="inline-flex items-center justify-center gap-1.5">
+                                <button wire:click="editProduct({{ $p->id }})" class="min-h-[34px] px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-amber-100 text-slate-700 hover:text-amber-800 text-xs font-bold transition-colors cursor-pointer">
                                     Edit
                                 </button>
-                                <button wire:click="deleteProduct({{ $p->id }})" onclick="return confirm('Apakah Anda yakin ingin menghapus produk ini?')" class="p-1.5 rounded-lg bg-slate-100 hover:bg-rose-100 text-slate-700 hover:text-rose-700 font-bold transition-colors">
+                                <button wire:click="deleteProduct({{ $p->id }})" onclick="return confirm('Apakah Anda yakin ingin menghapus produk ini?')" class="min-h-[34px] px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-rose-100 text-slate-700 hover:text-rose-700 text-xs font-bold transition-colors cursor-pointer">
                                     Hapus
                                 </button>
                             </div>

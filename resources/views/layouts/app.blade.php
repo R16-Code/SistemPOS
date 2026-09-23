@@ -15,7 +15,7 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
     </style>
 </head>
-<body x-data="{ mobileSidebarOpen: false }" class="h-full font-sans antialiased bg-slate-100 text-slate-800 flex flex-col xl:flex-row overflow-hidden">
+<body x-data="{ mobileSidebarOpen: false }" class="h-full font-sans antialiased bg-slate-100 text-slate-800 flex flex-col lg:flex-row overflow-hidden">
 
     <!-- Mobile & Tablet Backdrop Overlay -->
     <div x-show="mobileSidebarOpen" 
@@ -26,12 +26,12 @@
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
          @click="mobileSidebarOpen = false" 
-         class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-40 xl:hidden"
+         class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-40 lg:hidden"
          x-cloak
          style="display: none;"></div>
 
-    <!-- Mobile & Tablet Top Navigation Bar (Visible on < xl) -->
-    <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 shrink-0 xl:hidden z-30 shadow-2xs">
+    <!-- Mobile & Tablet Top Navigation Bar (Visible on < lg) -->
+    <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 shrink-0 lg:hidden z-30 shadow-2xs">
         <div class="flex items-center gap-3">
             <button type="button" 
                     @click="mobileSidebarOpen = true"
@@ -66,9 +66,9 @@
         </div>
     </header>
 
-    <!-- Sidebar Navigation (Off-canvas drawer on mobile & tablet, static on desktop xl:) -->
+    <!-- Sidebar Navigation (Off-canvas drawer on mobile & tablet portrait, static on desktop & tablet landscape lg:) -->
     <aside :class="mobileSidebarOpen ? 'is-open' : 'is-closed'"
-           class="sidebar-drawer fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col justify-between shrink-0 shadow-2xl xl:shadow-sm xl:static xl:transform-none">
+           class="sidebar-drawer fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col justify-between shrink-0 shadow-2xl lg:shadow-sm lg:static lg:transform-none">
         <div>
             <!-- Brand / Logo & Close Button -->
             <div class="h-16 flex items-center justify-between px-6 border-b border-slate-100">
@@ -84,10 +84,10 @@
                     </div>
                 </div>
 
-                <!-- Close button for drawer (visible on < xl) -->
+                <!-- Close button for drawer (visible on < lg) -->
                 <button type="button" 
                         @click="mobileSidebarOpen = false" 
-                        class="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-700 active:scale-95 transition-all xl:hidden cursor-pointer">
+                        class="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-700 active:scale-95 transition-all lg:hidden cursor-pointer">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>

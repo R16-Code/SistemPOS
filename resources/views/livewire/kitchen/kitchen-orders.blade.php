@@ -3,13 +3,7 @@
     <!-- Top Header & Live Indicator -->
     <div class="flex items-center justify-between gap-4 flex-wrap">
         <div>
-            <div class="flex items-center gap-2">
-                <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Antrian Pesanan Dapur & Barista</h2>
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>Live 5s</span>
-                </span>
-            </div>
+            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Antrian Pesanan Dapur & Barista</h2>
             <p class="text-xs text-slate-500 mt-1">Pantau pesanan yang masuk dan perbarui status proses makanan/minuman</p>
         </div>
 

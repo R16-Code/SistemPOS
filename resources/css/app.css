@@ -14,12 +14,12 @@
     display: none !important;
 }
 
-/* Off-canvas sidebar drawer for mobile and tablets (< 1280px) */
+/* Off-canvas sidebar drawer for mobile and tablet portrait (< 1024px) */
 .sidebar-drawer {
     transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@media (max-width: 1279px) {
+@media (max-width: 1023px) {
     .sidebar-drawer.is-closed {
         transform: translateX(-100%) !important;
         pointer-events: none;
