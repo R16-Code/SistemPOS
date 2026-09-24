@@ -350,10 +350,12 @@
                     <span>Diskon (Rp)</span>
                     <input type="number" wire:model.live="discountAmount" min="0" class="w-24 bg-white border border-slate-200 rounded px-2 py-0.5 text-right text-xs font-bold text-slate-900 focus:outline-none focus:border-amber-700">
                 </div>
-                <div class="flex justify-between">
-                    <span>PPN (11%)</span>
-                    <span class="text-slate-900 font-bold">Rp {{ number_format($this->taxAmount, 0, ',', '.') }}</span>
-                </div>
+                @if($this->taxRate > 0)
+                    <div class="flex justify-between">
+                        <span>{{ $taxName }} ({{ round($taxRate * 100) }}%)</span>
+                        <span class="text-slate-900 font-bold">Rp {{ number_format($this->taxAmount, 0, ',', '.') }}</span>
+                    </div>
+                @endif
                 <div class="flex justify-between pt-2 border-t border-slate-200 text-sm font-extrabold text-slate-900">
                     <span>Total Tagihan</span>
                     <span class="text-amber-800">Rp {{ number_format($this->totalAmount, 0, ',', '.') }}</span>
@@ -512,6 +514,45 @@
                             </div>
                         </div>
                     @endif
+
+                    <!-- QRIS Info -->
+                    @if($paymentMethod === 'qris')
+                        @php
+                            $storeQris = \App\Models\Setting::get('qris_image');
+                            $storeName = \App\Models\Setting::get('store_name', 'BrewPOS Coffee');
+                        @endphp
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center space-y-2">
+                            <span class="text-[10px] uppercase font-bold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full inline-block">QRIS Statis Kasir</span>
+                            @if($storeQris)
+                                <img src="{{ asset('storage/' . $storeQris) }}" alt="QRIS Toko" class="w-40 h-40 object-contain mx-auto rounded-lg bg-white p-2 border border-slate-200 shadow-2xs">
+                            @else
+                                <div class="w-36 h-36 mx-auto flex flex-col items-center justify-center bg-white border border-dashed border-slate-300 rounded-lg text-slate-400 p-2">
+                                    <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                                    <span class="text-[9px] font-bold mt-1 text-slate-400">Atur QRIS di Pengaturan</span>
+                                </div>
+                            @endif
+                            <p class="text-[11px] text-slate-600 font-bold">{{ $storeName }}</p>
+                            <p class="text-[10px] text-slate-500">Minta pelanggan memindai barcode QRIS di atas</p>
+                        </div>
+                    @endif
+
+                    <!-- Transfer Info -->
+                    @if($paymentMethod === 'transfer')
+                        @php
+                            $bankName = \App\Models\Setting::get('bank_name', 'BCA');
+                            $bankAcc = \App\Models\Setting::get('bank_account_number', '1234567890');
+                            $bankHolder = \App\Models\Setting::get('bank_account_holder', 'BrewPOS Indonesia');
+                        @endphp
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-left space-y-1.5 text-xs">
+                            <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Rekening Tujuan Transfer</span>
+                            <div class="bg-white p-2.5 rounded-lg border border-slate-200">
+                                <span class="font-extrabold text-slate-900 block">{{ $bankName }}</span>
+                                <span class="font-mono text-amber-800 font-bold text-sm select-all">{{ $bankAcc }}</span>
+                                <span class="text-[11px] text-slate-500 block">a.n. {{ $bankHolder }}</span>
+                            </div>
+                            <p class="text-[10px] text-slate-500">Pastikan dana telah masuk ke mutasi rekening sebelum menyelesaikan transaksi.</p>
+                        </div>
+                    @endif
                 </div>
 
                 <!-- Process Button -->
@@ -532,9 +573,19 @@
                 
                 <div id="thermal-receipt" class="space-y-3">
                     <div class="text-center space-y-1">
-                        <h2 class="font-bold text-base text-black uppercase tracking-wider">BREWPOS COFFEE</h2>
-                        <p class="text-[11px] text-slate-600">Jl. Mawar No. 123, Jakarta</p>
-                        <p class="text-[11px] text-slate-600">Telp: 0812-3456-7890</p>
+                        @php
+                            $receiptLogo = \App\Models\Setting::get('store_logo');
+                            $receiptStoreName = \App\Models\Setting::get('store_name', 'BREWPOS COFFEE');
+                            $receiptAddress = \App\Models\Setting::get('store_address', 'Jl. Mawar No. 123, Jakarta');
+                            $receiptPhone = \App\Models\Setting::get('store_phone', '0812-3456-7890');
+                            $receiptFooter = \App\Models\Setting::get('receipt_footer', 'Terima kasih atas kunjungan Anda!');
+                        @endphp
+                        @if($receiptLogo)
+                            <img src="{{ asset('storage/' . $receiptLogo) }}" alt="Logo" class="w-12 h-12 mx-auto object-contain mb-1">
+                        @endif
+                        <h2 class="font-bold text-base text-black uppercase tracking-wider">{{ $receiptStoreName }}</h2>
+                        <p class="text-[11px] text-slate-600">{{ $receiptAddress }}</p>
+                        <p class="text-[11px] text-slate-600">Telp: {{ $receiptPhone }}</p>
                         <div class="border-b border-dashed border-slate-400 my-2"></div>
                     </div>
 
@@ -577,10 +628,12 @@
                                 <span>-{{ number_format($completedOrder->discount_amount, 0, ',', '.') }}</span>
                             </div>
                         @endif
-                        <div class="flex justify-between">
-                            <span>PPN (11%):</span>
-                            <span>{{ number_format($completedOrder->tax_amount, 0, ',', '.') }}</span>
-                        </div>
+                        @if($completedOrder->tax_amount > 0)
+                            <div class="flex justify-between">
+                                <span>{{ $taxName }} ({{ round($taxRate * 100) }}%):</span>
+                                <span>{{ number_format($completedOrder->tax_amount, 0, ',', '.') }}</span>
+                            </div>
+                        @endif
                         <div class="flex justify-between font-bold text-sm text-black border-t border-slate-300 pt-1">
                             <span>TOTAL:</span>
                             <span>Rp {{ number_format($completedOrder->total_amount, 0, ',', '.') }}</span>
@@ -598,7 +651,7 @@
                     <div class="border-b border-dashed border-slate-400 my-2"></div>
 
                     <div class="text-center text-[10px] text-slate-500">
-                        <p>Terima kasih atas kunjungan Anda!</p>
+                        <p>{{ $receiptFooter }}</p>
                         <p>Powered by BrewPOS</p>
                     </div>
                 </div>

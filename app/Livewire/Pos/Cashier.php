@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\Setting;
 use App\Models\Table;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Title;
@@ -47,6 +48,8 @@ class Cashier extends Component
 
     public $taxRate = 0.11;
 
+    public $taxName = 'PPN';
+
     public $completedOrder = null;
 
     public bool $showIncomingOrdersModal = false;
@@ -61,6 +64,11 @@ class Cashier extends Component
 
     public function mount()
     {
+        $taxEnabled = (bool) ((int) Setting::get('tax_enabled', '1'));
+        $taxPercentage = (float) Setting::get('tax_percentage', 11);
+        $this->taxRate = $taxEnabled ? ($taxPercentage / 100) : 0;
+        $this->taxName = (string) Setting::get('tax_name', 'PPN');
+
         $firstTable = Table::where('status', 'available')->first();
         if ($firstTable) {
             $this->selectedTableId = $firstTable->id;

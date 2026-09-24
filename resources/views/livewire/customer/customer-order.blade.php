@@ -471,10 +471,12 @@
                             <span>Subtotal Menu</span>
                             <span>Rp {{ number_format($this->subtotal, 0, ',', '.') }}</span>
                         </div>
-                        <div class="flex justify-between text-slate-600">
-                            <span>PPN (11%)</span>
-                            <span>Rp {{ number_format($this->taxAmount, 0, ',', '.') }}</span>
-                        </div>
+                        @if($this->taxRate > 0)
+                            <div class="flex justify-between text-slate-600">
+                                <span>{{ $taxName }} ({{ round($taxRate * 100) }}%)</span>
+                                <span>Rp {{ number_format($this->taxAmount, 0, ',', '.') }}</span>
+                            </div>
+                        @endif
                         <div class="pt-2 border-t border-slate-200/80 flex justify-between font-bold text-slate-900 text-sm">
                             <span>Total Tagihan</span>
                             <span class="text-amber-900 font-extrabold">Rp {{ number_format($this->totalAmount, 0, ',', '.') }}</span>

@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\Setting;
 use App\Models\Table;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -48,10 +49,17 @@ class CustomerOrder extends Component
 
     public float $taxRate = 0.11;
 
+    public string $taxName = 'PPN';
+
     public function mount(string $token): void
     {
         $this->token = $token;
         $this->table = Table::where('qr_token', $token)->firstOrFail();
+
+        $taxEnabled = (bool) ((int) Setting::get('tax_enabled', '1'));
+        $taxPercentage = (float) Setting::get('tax_percentage', 11);
+        $this->taxRate = $taxEnabled ? ($taxPercentage / 100) : 0;
+        $this->taxName = (string) Setting::get('tax_name', 'PPN');
     }
 
     public function selectCategory(?int $categoryId): void
