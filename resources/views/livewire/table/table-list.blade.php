@@ -5,7 +5,7 @@
             <p class="text-xs text-slate-500 mt-1">Monitoring, tambah, edit, atau ubah status ketersediaan meja cafe</p>
         </div>
 
-        <button wire:click="openCreateModal" class="min-h-[44px] px-4 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs shadow-md shadow-amber-700/20 flex items-center justify-center gap-1.5 transition-all">
+        <button wire:click="openCreateModal" class="min-h-11 px-4 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs shadow-md shadow-amber-700/20 flex items-center justify-center gap-1.5 transition-all">
             <svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
             <span>Tambah Meja Baru</span>
         </button>
@@ -36,23 +36,23 @@
 
                 <div class="pt-3 border-t border-slate-100 space-y-2">
                     <button wire:click="toggleStatus({{ $t->id }})" 
-                            class="w-full min-h-[40px] py-2 px-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 active:scale-98 text-xs font-bold text-slate-700 transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                            class="w-full min-h-10 py-2 px-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 active:scale-98 text-xs font-bold text-slate-700 transition-all flex items-center justify-center gap-1.5 cursor-pointer">
                         <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                         <span>Ubah Status</span>
                     </button>
                     <div class="grid grid-cols-3 gap-1.5">
                         <button wire:click="openQrModal({{ $t->id }})" 
-                                class="min-h-[38px] py-1.5 px-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer">
+                                class="min-h-9.5 py-1.5 px-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer">
                             <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
                             <span>QR</span>
                         </button>
                         <button wire:click="editTable({{ $t->id }})" 
-                                class="min-h-[38px] py-1.5 px-2 rounded-xl bg-slate-100 hover:bg-amber-100 text-slate-700 hover:text-amber-800 text-xs font-bold transition-all flex items-center justify-center cursor-pointer">
+                                class="min-h-9.5 py-1.5 px-2 rounded-xl bg-slate-100 hover:bg-amber-100 text-slate-700 hover:text-amber-800 text-xs font-bold transition-all flex items-center justify-center cursor-pointer">
                             <span>Edit</span>
                         </button>
                         <button wire:click="deleteTable({{ $t->id }})" 
                                 onclick="return confirm('Apakah Anda yakin ingin menghapus meja ini?')" 
-                                class="min-h-[38px] py-1.5 px-2 rounded-xl bg-slate-100 hover:bg-rose-100 text-slate-700 hover:text-rose-700 text-xs font-bold transition-all flex items-center justify-center cursor-pointer">
+                                class="min-h-9.5 py-1.5 px-2 rounded-xl bg-slate-100 hover:bg-rose-100 text-slate-700 hover:text-rose-700 text-xs font-bold transition-all flex items-center justify-center cursor-pointer">
                             <span>Hapus</span>
                         </button>
                     </div>
@@ -69,7 +69,7 @@
                     <h3 class="text-base font-extrabold text-slate-900">
                         {{ $isEditMode ? 'Edit Data Meja' : 'Tambah Meja Baru' }}
                     </h3>
-                    <button wire:click="closeModal" class="text-slate-400 hover:text-slate-700 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl">
+                    <button wire:click="closeModal" class="text-slate-400 hover:text-slate-700 min-h-11 min-w-11 flex items-center justify-center rounded-xl">
                         <svg class="w-5 h-5 fill-none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
@@ -127,7 +127,7 @@
                             <p class="text-xs text-slate-500 font-medium">Kapasitas {{ $selectedQrTable->capacity }} Orang</p>
                         </div>
                     </div>
-                    <button type="button" wire:click="closeQrModal" class="text-slate-400 hover:text-slate-600 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl">
+                    <button type="button" wire:click="closeQrModal" class="text-slate-400 hover:text-slate-600 min-h-11 min-w-11 flex items-center justify-center rounded-xl">
                         <svg class="w-5 h-5 fill-none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
@@ -163,7 +163,7 @@
                                class="w-full text-xs bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 font-mono select-all focus:outline-none">
                         <button type="button"
                                 @click="navigator.clipboard.writeText('{{ $selectedQrTable->qr_url }}'); copied = true; setTimeout(() => copied = false, 2000)"
-                                class="min-h-[36px] px-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold shrink-0 transition-colors">
+                                class="min-h-9 px-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold shrink-0 transition-colors">
                             <span x-show="!copied">Salin</span>
                             <span x-show="copied" class="text-emerald-300">Tersalin!</span>
                         </button>
@@ -174,14 +174,14 @@
                 <div class="flex gap-2.5 pt-2 border-t border-slate-100">
                     <a href="{{ $selectedQrTable->qr_url }}"
                        target="_blank"
-                       class="flex-1 min-h-[42px] rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors">
+                       class="flex-1 min-h-10.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                         <span>Uji Buka URL</span>
                     </a>
 
                     <a href="{{ route('tables.print-qr', $selectedQrTable->id) }}"
                        target="_blank"
-                       class="flex-1 min-h-[42px] rounded-xl bg-amber-800 hover:bg-amber-900 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all">
+                       class="flex-1 min-h-10.5 rounded-xl bg-amber-800 hover:bg-amber-900 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                         <span>Cetak Kartu Meja</span>
                     </a>

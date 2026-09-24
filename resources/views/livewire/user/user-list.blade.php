@@ -22,7 +22,7 @@
 
             <button type="button" 
                     wire:click="openCreateModal" 
-                    class="min-h-[42px] px-4 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 active:scale-98 text-white font-bold text-xs shadow-md shadow-amber-700/20 flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+                    class="min-h-10.5 px-4 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 active:scale-98 text-white font-bold text-xs shadow-md shadow-amber-700/20 flex items-center justify-center gap-1.5 transition-all cursor-pointer">
                 <svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                 <span>Tambah Pengguna</span>
             </button>
@@ -31,7 +31,7 @@
 
     <div class="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm">
         <div class="overflow-x-auto">
-            <table class="w-full min-w-[780px] text-left text-xs text-slate-700">
+            <table class="w-full min-w-195 text-left text-xs text-slate-700">
             <thead class="bg-slate-100/70 text-slate-600 border-b border-slate-200 font-bold uppercase tracking-wider text-[11px]">
                 <tr>
                     <th class="px-5 py-3.5 whitespace-nowrap">Nama Lengkap</th>
@@ -89,11 +89,11 @@
                         <td class="px-5 py-4 whitespace-nowrap text-slate-500">{{ $user->created_at->format('d/m/Y') }}</td>
                         <td class="px-5 py-4 whitespace-nowrap text-center">
                             <div class="inline-flex items-center justify-center gap-1.5">
-                                <button type="button" wire:click="editUser({{ $user->id }})" class="min-h-[34px] px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-amber-100 text-slate-700 hover:text-amber-800 text-xs font-bold transition-colors cursor-pointer">
+                                <button type="button" wire:click="editUser({{ $user->id }})" class="min-h-8.5 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-amber-100 text-slate-700 hover:text-amber-800 text-xs font-bold transition-colors cursor-pointer">
                                     Edit
                                 </button>
                                 @if($user->id !== auth()->id())
-                                    <button type="button" wire:click="deleteUser({{ $user->id }})" onclick="return confirm('Apakah Anda yakin ingin menghapus/menonaktifkan pengguna ini?')" class="min-h-[34px] px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-rose-100 text-slate-700 hover:text-rose-700 text-xs font-bold transition-colors cursor-pointer">
+                                    <button type="button" wire:click="deleteUser({{ $user->id }})" onclick="return confirm('Apakah Anda yakin ingin menghapus/menonaktifkan pengguna ini?')" class="min-h-8.5 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-rose-100 text-slate-700 hover:text-rose-700 text-xs font-bold transition-colors cursor-pointer">
                                         Hapus
                                     </button>
                                 @endif
@@ -122,7 +122,7 @@
                     <h3 class="text-base font-extrabold text-slate-900">
                         {{ $isEditMode ? 'Edit Pengguna / Staf' : 'Tambah Pengguna Baru' }}
                     </h3>
-                    <button type="button" wire:click="closeModal" class="text-slate-400 hover:text-slate-700 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors">
+                    <button type="button" wire:click="closeModal" class="text-slate-400 hover:text-slate-700 min-h-11 min-w-11 flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors">
                         <svg class="w-5 h-5 fill-none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>

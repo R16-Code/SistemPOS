@@ -8,7 +8,7 @@
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <input type="text" wire:model.live.debounce.250ms="search" placeholder="Cari nama produk / SKU..." class="bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs text-slate-900 focus:outline-none focus:border-amber-700 shadow-2xs">
             
-            <button wire:click="openCreateModal" class="min-h-[44px] px-4 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs shadow-md shadow-amber-700/20 flex items-center justify-center gap-1.5 transition-all">
+            <button wire:click="openCreateModal" class="min-h-11 px-4 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs shadow-md shadow-amber-700/20 flex items-center justify-center gap-1.5 transition-all">
                 <svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                 <span>Tambah Produk</span>
             </button>
@@ -17,11 +17,11 @@
 
     <div class="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm">
         <div class="overflow-x-auto">
-            <table class="w-full min-w-[780px] text-left text-xs text-slate-700">
+            <table class="w-full min-w-195 text-left text-xs text-slate-700">
             <thead class="bg-slate-100/70 text-slate-600 border-b border-slate-200 font-bold uppercase tracking-wider text-[11px]">
                 <tr>
                     <th class="px-5 py-3.5 whitespace-nowrap">SKU</th>
-                    <th class="px-5 py-3.5 min-w-[200px]">Nama Produk</th>
+                    <th class="px-5 py-3.5 min-w-50">Nama Produk</th>
                     <th class="px-5 py-3.5 whitespace-nowrap">Kategori</th>
                     <th class="px-5 py-3.5 whitespace-nowrap">Harga</th>
                     <th class="px-5 py-3.5 whitespace-nowrap">Stok</th>
@@ -33,7 +33,7 @@
                 @forelse($products as $p)
                     <tr class="hover:bg-slate-50/80 transition-colors">
                         <td class="px-5 py-4 whitespace-nowrap font-mono font-bold text-amber-800">{{ $p->sku }}</td>
-                        <td class="px-5 py-4 min-w-[200px]">
+                        <td class="px-5 py-4 min-w-50">
                             <span class="font-bold text-slate-900 block">{{ $p->name }}</span>
                             @if($p->variants->isNotEmpty())
                                 <div class="flex items-center gap-1.5 mt-1 flex-wrap">
@@ -55,10 +55,10 @@
                         </td>
                         <td class="px-5 py-4 whitespace-nowrap text-center">
                             <div class="inline-flex items-center justify-center gap-1.5">
-                                <button wire:click="editProduct({{ $p->id }})" class="min-h-[34px] px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-amber-100 text-slate-700 hover:text-amber-800 text-xs font-bold transition-colors cursor-pointer">
+                                <button wire:click="editProduct({{ $p->id }})" class="min-h-8.5 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-amber-100 text-slate-700 hover:text-amber-800 text-xs font-bold transition-colors cursor-pointer">
                                     Edit
                                 </button>
-                                <button wire:click="deleteProduct({{ $p->id }})" onclick="return confirm('Apakah Anda yakin ingin menghapus produk ini?')" class="min-h-[34px] px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-rose-100 text-slate-700 hover:text-rose-700 text-xs font-bold transition-colors cursor-pointer">
+                                <button wire:click="deleteProduct({{ $p->id }})" onclick="return confirm('Apakah Anda yakin ingin menghapus produk ini?')" class="min-h-8.5 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-rose-100 text-slate-700 hover:text-rose-700 text-xs font-bold transition-colors cursor-pointer">
                                     Hapus
                                 </button>
                             </div>
@@ -87,7 +87,7 @@
                     <h3 class="text-base font-extrabold text-slate-900">
                         {{ $isEditMode ? 'Edit Produk' : 'Tambah Produk Baru' }}
                     </h3>
-                    <button wire:click="closeModal" class="text-slate-400 hover:text-slate-700 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors">
+                    <button wire:click="closeModal" class="text-slate-400 hover:text-slate-700 min-h-11 min-w-11 flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors">
                         <svg class="w-5 h-5 fill-none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
@@ -155,7 +155,7 @@
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer shrink-0">
                                 <input type="checkbox" wire:model.live="hasVariants" id="toggle_has_variants" class="sr-only peer">
-                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-700"></div>
+                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-700"></div>
                             </label>
                         </div>
                     </div>

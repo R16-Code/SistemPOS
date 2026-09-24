@@ -18,7 +18,7 @@
             <div class="flex items-center gap-2 shrink-0">
                 @if($this->activeOrders->isNotEmpty())
                     <a href="{{ route('customer.order.status', ['token' => $token, 'invoice' => $this->activeOrders->first()->invoice_number]) }}"
-                       class="inline-flex items-center gap-1.5 min-h-[44px] px-3 py-1.5 rounded-full bg-amber-900 text-amber-100 hover:bg-amber-800 border border-amber-700/80 text-xs font-bold transition-all shadow-xs active:scale-95">
+                       class="inline-flex items-center gap-1.5 min-h-11 px-3 py-1.5 rounded-full bg-amber-900 text-amber-100 hover:bg-amber-800 border border-amber-700/80 text-xs font-bold transition-all shadow-xs active:scale-95">
                         <span class="relative flex h-2 w-2">
                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                             <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -27,7 +27,7 @@
                     </a>
                 @endif
 
-                <div class="inline-flex items-center gap-1.5 min-h-[44px] px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200/80 text-amber-900 text-xs font-bold">
+                <div class="inline-flex items-center gap-1.5 min-h-11 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200/80 text-amber-900 text-xs font-bold">
                     <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                     <span>{{ $table->table_number }}</span>
                 </div>
@@ -48,7 +48,7 @@
                 </svg>
             </div>
             @if(!empty($search))
-                <button type="button" wire:click="$set('search', '')" class="absolute right-1 top-1 bottom-1 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-slate-600">
+                <button type="button" wire:click="$set('search', '')" class="absolute right-1 top-1 bottom-1 min-w-11 min-h-11 flex items-center justify-center text-slate-400 hover:text-slate-600">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
@@ -58,16 +58,16 @@
     </header>
 
     <!-- Category Pills (Horizontal Scroll) -->
-    <div class="sticky top-[105px] z-20 bg-slate-50/95 backdrop-blur-xs px-4 py-2.5 border-b border-slate-200 overflow-x-auto no-scrollbar flex items-center gap-2">
+    <div class="sticky top-26.25 z-20 bg-slate-50/95 backdrop-blur-xs px-4 py-2.5 border-b border-slate-200 overflow-x-auto no-scrollbar flex items-center gap-2">
         <button type="button"
                 wire:click="selectCategory(null)"
-                class="min-h-[44px] px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 {{ is_null($selectedCategory) ? 'bg-amber-800 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100' }}">
+                class="min-h-11 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 {{ is_null($selectedCategory) ? 'bg-amber-800 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100' }}">
             Semua Menu
         </button>
         @foreach($categories as $cat)
             <button type="button"
                     wire:click="selectCategory({{ $cat->id }})"
-                    class="min-h-[44px] px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 {{ $selectedCategory === $cat->id ? 'bg-amber-800 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100' }}">
+                    class="min-h-11 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 {{ $selectedCategory === $cat->id ? 'bg-amber-800 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100' }}">
                 {{ $cat->name }}
             </button>
         @endforeach
@@ -106,7 +106,7 @@
                         'dot' => 'bg-white',
                     ];
                 @endphp
-                <div class="bg-gradient-to-br from-slate-900 via-amber-950 to-slate-900 text-white rounded-2xl p-3.5 shadow-md border border-amber-800/40 relative overflow-hidden">
+                <div class="bg-linear-to-br from-slate-900 via-amber-950 to-slate-900 text-white rounded-2xl p-3.5 shadow-md border border-amber-800/40 relative overflow-hidden">
                     <div class="flex items-center justify-between gap-3 relative z-10">
                         <div class="flex items-center gap-3 min-w-0">
                             <div class="w-10 h-10 rounded-xl bg-amber-800/70 border border-amber-600/40 flex items-center justify-center shrink-0 shadow-inner text-amber-300">
@@ -129,7 +129,7 @@
                         </div>
 
                         <a href="{{ route('customer.order.status', ['token' => $token, 'invoice' => $activeOrder->invoice_number]) }}"
-                           class="min-h-[44px] px-4 rounded-xl bg-amber-600 hover:bg-amber-500 active:scale-95 text-white text-xs font-bold shrink-0 flex items-center gap-1.5 shadow-sm transition-all whitespace-nowrap border border-amber-500/50">
+                           class="min-h-11 px-4 rounded-xl bg-amber-600 hover:bg-amber-500 active:scale-95 text-white text-xs font-bold shrink-0 flex items-center gap-1.5 shadow-sm transition-all whitespace-nowrap border border-amber-500/50">
                             <span>Lihat Status</span>
                             <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
@@ -195,14 +195,14 @@
                         @if($product->stock > 0)
                             <button type="button"
                                     wire:click="selectProductForOrder({{ $product->id }})"
-                                    class="min-h-[44px] min-w-[44px] px-3.5 rounded-xl bg-amber-800 hover:bg-amber-900 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all">
+                                    class="min-h-11 min-w-11 px-3.5 rounded-xl bg-amber-800 hover:bg-amber-900 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
                                 <span>Pesan</span>
                             </button>
                         @else
-                            <button type="button" disabled class="min-h-[44px] px-3 rounded-xl bg-slate-100 text-slate-400 font-medium text-xs cursor-not-allowed border border-slate-200">
+                            <button type="button" disabled class="min-h-11 px-3 rounded-xl bg-slate-100 text-slate-400 font-medium text-xs cursor-not-allowed border border-slate-200">
                                 Habis
                             </button>
                         @endif
@@ -229,7 +229,7 @@
             <div class="w-full max-w-md pointer-events-auto">
                 <button type="button"
                         wire:click="openCart"
-                        class="w-full min-h-[52px] bg-slate-900 text-white rounded-2xl px-4 py-3 flex items-center justify-between shadow-xl shadow-slate-900/25 active:scale-[0.99] transition-all border border-slate-800">
+                        class="w-full min-h-13 bg-slate-900 text-white rounded-2xl px-4 py-3 flex items-center justify-between shadow-xl shadow-slate-900/25 active:scale-[0.99] transition-all border border-slate-800">
                     <div class="flex items-center gap-2.5">
                         <div class="w-8 h-8 rounded-xl bg-amber-600 text-white flex items-center justify-center text-xs font-black shrink-0">
                             {{ $this->totalItemsCount }}
@@ -264,7 +264,7 @@
                             Rp {{ number_format($this->variantModalPrice, 0, ',', '.') }}
                         </p>
                     </div>
-                    <button type="button" wire:click="closeVariantModal" class="min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 hover:text-slate-600 rounded-full">
+                    <button type="button" wire:click="closeVariantModal" class="min-h-11 min-w-11 flex items-center justify-center text-slate-400 hover:text-slate-600 rounded-full">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
@@ -286,7 +286,7 @@
                                 @foreach($variants as $variant)
                                     <button type="button"
                                             wire:click="$set('selectedVariants.{{ $groupName }}', {{ $variant->id }})"
-                                            class="min-h-[44px] px-3 py-2 rounded-xl text-xs font-medium border text-left flex flex-col justify-center transition-all {{ ($selectedVariants[$groupName] ?? null) == $variant->id ? 'bg-amber-50 border-amber-600 text-amber-950 font-bold ring-1 ring-amber-600' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50' }}">
+                                            class="min-h-11 px-3 py-2 rounded-xl text-xs font-medium border text-left flex flex-col justify-center transition-all {{ ($selectedVariants[$groupName] ?? null) == $variant->id ? 'bg-amber-50 border-amber-600 text-amber-950 font-bold ring-1 ring-amber-600' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50' }}">
                                         <span>{{ $variant->name }}</span>
                                         @if($variant->extra_price > 0)
                                             <span class="text-[10px] text-amber-800 font-semibold">+Rp {{ number_format($variant->extra_price, 0, ',', '.') }}</span>
@@ -313,12 +313,12 @@
                 <div class="p-4 border-t border-slate-100 bg-slate-50 flex items-center gap-3">
                     <button type="button"
                             wire:click="closeVariantModal"
-                            class="min-h-[48px] px-4 rounded-xl border border-slate-300 bg-white text-slate-700 font-semibold text-xs hover:bg-slate-100 transition-colors">
+                            class="min-h-12 px-4 rounded-xl border border-slate-300 bg-white text-slate-700 font-semibold text-xs hover:bg-slate-100 transition-colors">
                         Batal
                     </button>
                     <button type="button"
                             wire:click="confirmVariantSelection"
-                            class="flex-1 min-h-[48px] rounded-xl bg-amber-800 hover:bg-amber-900 active:scale-98 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all">
+                            class="flex-1 min-h-12 rounded-xl bg-amber-800 hover:bg-amber-900 active:scale-98 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all">
                         <span>Tambahkan ke Pesanan</span>
                         <span>(Rp {{ number_format($this->variantModalPrice, 0, ',', '.') }})</span>
                     </button>
@@ -337,7 +337,7 @@
                         <h3 class="font-extrabold text-base text-slate-900">Konfirmasi Pesanan</h3>
                         <p class="text-xs text-slate-500 font-medium">Meja: <span class="font-bold text-amber-800">{{ $table->table_number }}</span></p>
                     </div>
-                    <button type="button" wire:click="closeCart" class="min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 hover:text-slate-600 rounded-full">
+                    <button type="button" wire:click="closeCart" class="min-h-11 min-w-11 flex items-center justify-center text-slate-400 hover:text-slate-600 rounded-full">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
@@ -373,7 +373,7 @@
                                 <div class="flex items-center gap-1 shrink-0 bg-white border border-slate-200 rounded-2xl p-0.5 shadow-2xs">
                                     <button type="button"
                                             wire:click="updateQuantity('{{ $key }}', -1)"
-                                            class="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-base font-bold active:scale-95 transition-all">
+                                            class="min-w-11 min-h-11 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-base font-bold active:scale-95 transition-all">
                                         -
                                     </button>
                                     <span class="w-7 text-center text-xs font-black text-slate-800">
@@ -381,7 +381,7 @@
                                     </span>
                                     <button type="button"
                                             wire:click="updateQuantity('{{ $key }}', 1)"
-                                            class="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-amber-800 hover:bg-amber-900 text-white text-base font-bold active:scale-95 transition-all">
+                                            class="min-w-11 min-h-11 flex items-center justify-center rounded-xl bg-amber-800 hover:bg-amber-900 text-white text-base font-bold active:scale-95 transition-all">
                                         +
                                     </button>
                                 </div>
@@ -484,13 +484,13 @@
                 <div class="p-4 border-t border-slate-200 bg-white flex items-center gap-3">
                     <button type="button"
                             wire:click="closeCart"
-                            class="min-h-[48px] px-4 rounded-xl border border-slate-300 text-slate-700 font-semibold text-xs hover:bg-slate-100 transition-colors">
+                            class="min-h-12 px-4 rounded-xl border border-slate-300 text-slate-700 font-semibold text-xs hover:bg-slate-100 transition-colors">
                         Kembali
                     </button>
                     <button type="button"
                             wire:click="submitOrder"
                             wire:loading.attr="disabled"
-                            class="flex-1 min-h-[48px] rounded-xl bg-amber-800 hover:bg-amber-900 active:scale-98 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all disabled:opacity-50">
+                            class="flex-1 min-h-12 rounded-xl bg-amber-800 hover:bg-amber-900 active:scale-98 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all disabled:opacity-50">
                         <span wire:loading.remove>Kirim Pesanan Sekarang</span>
                         <span wire:loading class="flex items-center gap-2">
                             <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">

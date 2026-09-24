@@ -30,14 +30,14 @@
             <button type="button" 
                     @click="posTab = 'menu'" 
                     :class="posTab === 'menu' ? 'bg-amber-800 text-white font-bold shadow-xs' : 'text-slate-600 font-medium'"
-                    class="flex-1 min-h-[38px] py-1.5 px-3 rounded-lg text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                    class="flex-1 min-h-9.5 py-1.5 px-3 rounded-lg text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                 <span>Katalog Menu</span>
             </button>
             <button type="button" 
                     @click="posTab = 'cart'" 
                     :class="posTab === 'cart' ? 'bg-amber-800 text-white font-bold shadow-xs' : 'text-slate-600 font-medium'"
-                    class="flex-1 min-h-[38px] py-1.5 px-3 rounded-lg text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                    class="flex-1 min-h-9.5 py-1.5 px-3 rounded-lg text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
                 <span>Pesanan Aktif</span>
                 @if(count($cart) > 0)
@@ -64,7 +64,7 @@
                         <!-- QR Incoming Orders Button -->
                         <button type="button"
                                 wire:click="openIncomingOrdersModal"
-                                class="min-h-[40px] px-3 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 shrink-0 cursor-pointer {{ $incomingOrdersCount > 0 ? 'bg-amber-50 border-amber-600 text-amber-900 ring-1 ring-amber-600 shadow-xs' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100' }}">
+                                class="min-h-10 px-3 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 shrink-0 cursor-pointer {{ $incomingOrdersCount > 0 ? 'bg-amber-50 border-amber-600 text-amber-900 ring-1 ring-amber-600 shadow-xs' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100' }}">
                             <svg class="w-4 h-4 text-amber-800 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
                             </svg>
@@ -206,7 +206,7 @@
              class="md:hidden fixed bottom-3 left-3 right-3 z-30">
             <button type="button" 
                     @click="posTab = 'cart'" 
-                    class="w-full min-h-[48px] py-3 px-4 rounded-2xl bg-amber-800 hover:bg-amber-900 active:scale-98 text-white font-bold text-xs shadow-xl flex items-center justify-between transition-all cursor-pointer">
+                    class="w-full min-h-12 py-3 px-4 rounded-2xl bg-amber-800 hover:bg-amber-900 active:scale-98 text-white font-bold text-xs shadow-xl flex items-center justify-between transition-all cursor-pointer">
                 <div class="flex items-center gap-2">
                     <span class="w-6 h-6 rounded-full bg-amber-950 text-white flex items-center justify-center text-[11px] font-extrabold">{{ count($cart) }}</span>
                     <span>Total: Rp {{ number_format($this->totalAmount, 0, ',', '.') }}</span>
@@ -227,7 +227,7 @@
             <div class="md:hidden p-2.5 bg-amber-50/90 border-b border-amber-200/70 flex items-center justify-between shrink-0">
                 <button type="button" 
                         @click="posTab = 'menu'" 
-                        class="min-h-[38px] px-2 text-xs font-bold text-amber-900 flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer">
+                        class="min-h-9.5 px-2 text-xs font-bold text-amber-900 flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                     <span>Tambah Menu Lain</span>
                 </button>
@@ -375,7 +375,7 @@
                         <h3 class="text-base font-extrabold text-slate-900">{{ $selectedProduct->name }}</h3>
                         <p class="text-xs text-slate-500">Pilih opsi varian dan catatan pesanan</p>
                     </div>
-                    <button wire:click="closeVariantModal" class="text-slate-400 hover:text-slate-700 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl">
+                    <button wire:click="closeVariantModal" class="text-slate-400 hover:text-slate-700 min-h-11 min-w-11 flex items-center justify-center rounded-xl">
                         <svg class="w-5 h-5 fill-none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
@@ -432,7 +432,7 @@
                     </div>
 
                     <button wire:click="confirmVariantSelection" 
-                            class="min-h-[44px] py-2.5 px-5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs shadow-md shadow-amber-700/20 transition-all flex items-center justify-center">
+                            class="min-h-11 py-2.5 px-5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs shadow-md shadow-amber-700/20 transition-all flex items-center justify-center">
                         Tambahkan ke Pesanan
                     </button>
                 </div>
@@ -449,7 +449,7 @@
                         <svg class="w-5 h-5 text-amber-700 fill-none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                         <span>Pembayaran Kasir</span>
                     </h3>
-                    <button wire:click="closePaymentModal" class="text-slate-400 hover:text-slate-700 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl">
+                    <button wire:click="closePaymentModal" class="text-slate-400 hover:text-slate-700 min-h-11 min-w-11 flex items-center justify-center rounded-xl">
                         <svg class="w-5 h-5 fill-none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
@@ -471,7 +471,7 @@
                             @foreach(['cash' => 'Tunai / Cash', 'qris' => 'QRIS Static', 'transfer' => 'Transfer Bank'] as $key => $label)
                                 <button type="button" 
                                         wire:click="$set('paymentMethod', '{{ $key }}')"
-                                        class="min-h-[44px] py-2.5 px-3 rounded-xl border text-xs font-bold transition-all {{ $paymentMethod === $key ? 'border-amber-700 bg-amber-700 text-white shadow-xs' : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100' }}">
+                                        class="min-h-11 py-2.5 px-3 rounded-xl border text-xs font-bold transition-all {{ $paymentMethod === $key ? 'border-amber-700 bg-amber-700 text-white shadow-xs' : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100' }}">
                                     {{ $label }}
                                 </button>
                             @endforeach
@@ -493,10 +493,10 @@
 
                             <!-- Quick Money Buttons -->
                             <div class="grid grid-cols-4 gap-2">
-                                <button type="button" wire:click="setQuickMoney({{ $this->totalAmount }})" class="min-h-[40px] py-1.5 rounded-lg bg-slate-100 text-[11px] font-bold text-slate-700 hover:bg-slate-200">Uang Pas</button>
-                                <button type="button" wire:click="setQuickMoney(50000)" class="min-h-[40px] py-1.5 rounded-lg bg-slate-100 text-[11px] font-bold text-slate-700 hover:bg-slate-200">50.000</button>
-                                <button type="button" wire:click="setQuickMoney(100000)" class="min-h-[40px] py-1.5 rounded-lg bg-slate-100 text-[11px] font-bold text-slate-700 hover:bg-slate-200">100.000</button>
-                                <button type="button" wire:click="setQuickMoney(200000)" class="min-h-[40px] py-1.5 rounded-lg bg-slate-100 text-[11px] font-bold text-slate-700 hover:bg-slate-200">200.000</button>
+                                <button type="button" wire:click="setQuickMoney({{ $this->totalAmount }})" class="min-h-10 py-1.5 rounded-lg bg-slate-100 text-[11px] font-bold text-slate-700 hover:bg-slate-200">Uang Pas</button>
+                                <button type="button" wire:click="setQuickMoney(50000)" class="min-h-10 py-1.5 rounded-lg bg-slate-100 text-[11px] font-bold text-slate-700 hover:bg-slate-200">50.000</button>
+                                <button type="button" wire:click="setQuickMoney(100000)" class="min-h-10 py-1.5 rounded-lg bg-slate-100 text-[11px] font-bold text-slate-700 hover:bg-slate-200">100.000</button>
+                                <button type="button" wire:click="setQuickMoney(200000)" class="min-h-10 py-1.5 rounded-lg bg-slate-100 text-[11px] font-bold text-slate-700 hover:bg-slate-200">200.000</button>
                             </div>
 
                             <!-- Change Calculation -->
@@ -513,7 +513,7 @@
                 <!-- Process Button -->
                 <div class="pt-3 border-t border-slate-100 shrink-0">
                     <button wire:click="processPayment" 
-                            class="w-full min-h-[48px] rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-sm shadow-md shadow-amber-700/20 transition-all flex items-center justify-center">
+                            class="w-full min-h-12 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-sm shadow-md shadow-amber-700/20 transition-all flex items-center justify-center">
                         Selesaikan Transaksi & Cetak Struk
                     </button>
                 </div>
@@ -628,7 +628,7 @@
                             <p class="text-xs text-slate-500 font-medium">Tinjau, terima pembayaran, atau teruskan pesanan pelanggan ke dapur</p>
                         </div>
                     </div>
-                    <button type="button" wire:click="closeIncomingOrdersModal" class="min-w-[44px] min-h-[44px] rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 flex items-center justify-center transition-colors">
+                    <button type="button" wire:click="closeIncomingOrdersModal" class="min-w-11 min-h-11 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 flex items-center justify-center transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
@@ -818,13 +818,13 @@
                                     <button type="button"
                                             wire:click="rejectIncomingOrder({{ $currentOrder->id }})"
                                             wire:confirm="Yakin ingin membatalkan/menolak pesanan dari {{ $currentOrder->table?->table_number }} ini? Stok akan dikembalikan."
-                                            class="min-h-[44px] px-4 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-bold transition-colors">
+                                            class="min-h-11 px-4 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-bold transition-colors">
                                         Tolak Pesanan
                                     </button>
 
                                     <button type="button"
                                             wire:click="confirmIncomingOrder({{ $currentOrder->id }})"
-                                            class="flex-1 min-h-[44px] rounded-xl bg-amber-800 hover:bg-amber-900 active:scale-98 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-all">
+                                            class="flex-1 min-h-11 rounded-xl bg-amber-800 hover:bg-amber-900 active:scale-98 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-all">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                         </svg>

@@ -18,7 +18,7 @@
     <!-- Top Header Navigation -->
     <div class="flex items-center justify-between gap-3 pt-2">
         <a href="{{ route('customer.order', $token) }}"
-           class="min-h-[44px] px-3 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold inline-flex items-center gap-1.5 shadow-2xs hover:bg-slate-100 transition-colors">
+           class="min-h-11 px-3 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold inline-flex items-center gap-1.5 shadow-2xs hover:bg-slate-100 transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
@@ -143,7 +143,7 @@
                 $currentStep = $statusOrder[$order->order_status] ?? 1;
             @endphp
             <div class="pt-4 border-t border-slate-100 flex items-center justify-between text-center relative px-2">
-                <div class="absolute left-6 right-6 top-7 h-0.5 bg-slate-200 -z-0">
+                <div class="absolute left-6 right-6 top-7 h-0.5 bg-slate-200 z-0">
                     <div class="h-full bg-amber-700 transition-all duration-300" style="width: {{ min(100, max(0, ($currentStep - 1) * 33)) }}%;"></div>
                 </div>
 
@@ -240,7 +240,7 @@
     <!-- Additional Order Action Button -->
     <div>
         <a href="{{ route('customer.order', $token) }}"
-           class="w-full min-h-[48px] rounded-2xl bg-amber-800 hover:bg-amber-900 active:scale-98 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all">
+           class="w-full min-h-12 rounded-2xl bg-amber-800 hover:bg-amber-900 active:scale-98 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>

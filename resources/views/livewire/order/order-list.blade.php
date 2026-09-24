@@ -59,13 +59,13 @@
 
     <div class="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full min-w-[980px] text-left text-xs text-slate-700">
+            <table class="w-full min-w-245 text-left text-xs text-slate-700">
                 <thead class="bg-slate-100/70 text-slate-600 border-b border-slate-200 font-bold uppercase tracking-wider text-[10px]">
                     <tr>
                         <th class="px-4 py-3.5 whitespace-nowrap">Invoice</th>
                         <th class="px-3 py-3.5 whitespace-nowrap">Waktu</th>
-                        <th class="px-4 py-3.5 min-w-[140px]">Pelanggan & Meja</th>
-                        <th class="px-4 py-3.5 min-w-[180px]">Menu Dipesan</th>
+                        <th class="px-4 py-3.5 min-w-35">Pelanggan & Meja</th>
+                        <th class="px-4 py-3.5 min-w-45">Menu Dipesan</th>
                         <th class="px-4 py-3.5 text-right whitespace-nowrap">Total</th>
                         <th class="px-3 py-3.5 text-center whitespace-nowrap">Status Dapur</th>
                         <th class="px-3 py-3.5 text-center whitespace-nowrap">Pembayaran</th>
@@ -272,11 +272,11 @@
                 <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 shrink-0">
                     <button wire:click="showReceipt({{ $selectedOrderDetail->id }})" 
                             type="button" 
-                            class="min-h-[44px] px-4 py-2 bg-amber-800 hover:bg-amber-900 text-white rounded-xl text-xs font-bold transition-all inline-flex items-center gap-1.5 shadow-sm shadow-amber-800/20 cursor-pointer">
+                            class="min-h-11 px-4 py-2 bg-amber-800 hover:bg-amber-900 text-white rounded-xl text-xs font-bold transition-all inline-flex items-center gap-1.5 shadow-sm shadow-amber-800/20 cursor-pointer">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                         <span>Cetak Struk</span>
                     </button>
-                    <button wire:click="closeOrderDetailModal" type="button" class="min-h-[44px] px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center justify-center">
+                    <button wire:click="closeOrderDetailModal" type="button" class="min-h-11 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center justify-center">
                         Tutup
                     </button>
                 </div>
