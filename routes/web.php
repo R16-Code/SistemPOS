@@ -10,6 +10,7 @@ use App\Livewire\Order\OrderList;
 use App\Livewire\Pos\Cashier;
 use App\Livewire\Product\ProductList;
 use App\Livewire\Report\ReportIndex;
+use App\Livewire\Setting\SettingIndex;
 use App\Livewire\Table\TableList;
 use App\Livewire\User\UserList;
 use Illuminate\Support\Facades\Auth;
@@ -49,4 +50,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/reports', ReportIndex::class)->name('reports')->middleware('role:admin');
     Route::get('/reports/print', [ReportPrintController::class, 'printReport'])->name('reports.print')->middleware('role:admin');
     Route::get('/users', UserList::class)->name('users')->middleware('role:admin');
+    Route::get('/settings', SettingIndex::class)->name('settings')->middleware('role:admin');
 });
