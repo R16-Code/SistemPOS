@@ -10,6 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Tailwind & Assets -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Chart.js for Reports & Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     @livewireStyles
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }

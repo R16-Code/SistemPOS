@@ -4,6 +4,7 @@ namespace App\Livewire\Report;
 
 use App\Models\Order;
 use App\Models\OrderItem;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -39,16 +40,25 @@ class ReportIndex extends Component
             $this->startDate = null;
             $this->endDate = null;
         }
+
+        $this->dispatchChartsUpdate();
     }
 
     public function updatedStartDate()
     {
         $this->dateRange = 'custom';
+        $this->dispatchChartsUpdate();
     }
 
     public function updatedEndDate()
     {
         $this->dateRange = 'custom';
+        $this->dispatchChartsUpdate();
+    }
+
+    public function dispatchChartsUpdate(): void
+    {
+        $this->dispatch('charts-updated', ...$this->getChartData());
     }
 
     public function exportExcel()
@@ -143,8 +153,34 @@ class ReportIndex extends Component
         $allTimeRevenue = Order::sum('total_amount');
         $allTimeOrders = Order::count();
 
-        // Chart 1: Trend dataset
+        $chartData = $this->getChartData();
+
+        return view('livewire.report.report-index', array_merge([
+            'periodRevenue' => $periodRevenue,
+            'periodOrders' => $periodOrders,
+            'averageOrder' => $averageOrder,
+            'topProducts' => $topProducts,
+            'allTimeRevenue' => $allTimeRevenue,
+            'allTimeOrders' => $allTimeOrders,
+        ], $chartData));
+    }
+
+    public function getChartData(): array
+    {
+        $ordersQuery = Order::query();
+
+        if (! empty($this->startDate) && ! empty($this->endDate)) {
+            $ordersQuery->whereBetween('created_at', [
+                $this->startDate.' 00:00:00',
+                $this->endDate.' 23:59:59',
+            ]);
+        }
+
         $isSingleDay = (! empty($this->startDate) && ! empty($this->endDate) && $this->startDate === $this->endDate);
+
+        $chartLabels = [];
+        $chartSales = [];
+        $chartOrders = [];
 
         if ($isSingleDay) {
             $hourlyData = (clone $ordersQuery)
@@ -154,14 +190,42 @@ class ReportIndex extends Component
                 ->get()
                 ->keyBy('hour');
 
-            $chartLabels = [];
-            $chartSales = [];
-            $chartOrders = [];
-
             for ($h = 8; $h <= 22; $h++) {
                 $chartLabels[] = sprintf('%02d:00', $h);
                 $chartSales[] = (int) ($hourlyData[$h]->total_sales ?? 0);
                 $chartOrders[] = (int) ($hourlyData[$h]->total_orders ?? 0);
+            }
+        } elseif (! empty($this->startDate) && ! empty($this->endDate)) {
+            $dailyData = (clone $ordersQuery)
+                ->select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(total_amount) as total_sales'), DB::raw('COUNT(*) as total_orders'))
+                ->groupBy(DB::raw('DATE(created_at)'))
+                ->get()
+                ->keyBy('date');
+
+            $current = Carbon::parse($this->startDate);
+            $end = Carbon::parse($this->endDate);
+            $daysDiff = $current->diffInDays($end);
+
+            if ($daysDiff <= 31) {
+                while ($current <= $end) {
+                    $dateKey = $current->format('Y-m-d');
+                    $chartLabels[] = $current->format('d M');
+                    $chartSales[] = (int) ($dailyData[$dateKey]->total_sales ?? 0);
+                    $chartOrders[] = (int) ($dailyData[$dateKey]->total_orders ?? 0);
+                    $current->addDay();
+                }
+            } else {
+                foreach ($dailyData->sortBy('date') as $dateKey => $row) {
+                    $chartLabels[] = date('d M', strtotime($dateKey));
+                    $chartSales[] = (int) $row->total_sales;
+                    $chartOrders[] = (int) $row->total_orders;
+                }
+            }
+
+            if (empty($chartLabels)) {
+                $chartLabels = [now()->format('d M')];
+                $chartSales = [0];
+                $chartOrders = [0];
             }
         } else {
             $dailyData = (clone $ordersQuery)
@@ -169,10 +233,6 @@ class ReportIndex extends Component
                 ->groupBy(DB::raw('DATE(created_at)'))
                 ->orderBy('date')
                 ->get();
-
-            $chartLabels = [];
-            $chartSales = [];
-            $chartOrders = [];
 
             foreach ($dailyData as $row) {
                 $chartLabels[] = date('d M', strtotime($row->date));
@@ -187,7 +247,7 @@ class ReportIndex extends Component
             }
         }
 
-        // Chart 2: Payment method dataset
+        // Payment method distribution
         $paymentData = (clone $ordersQuery)
             ->select('payment_method', DB::raw('COUNT(*) as count'), DB::raw('SUM(total_amount) as total'))
             ->groupBy('payment_method')
@@ -209,25 +269,13 @@ class ReportIndex extends Component
             $paymentTotals[] = (int) $pm->total;
         }
 
-        if (empty($paymentLabels)) {
-            $paymentLabels = ['Tunai (Cash)'];
-            $paymentCounts = [0];
-            $paymentTotals = [0];
-        }
-
-        return view('livewire.report.report-index', [
-            'periodRevenue' => $periodRevenue,
-            'periodOrders' => $periodOrders,
-            'averageOrder' => $averageOrder,
-            'topProducts' => $topProducts,
-            'allTimeRevenue' => $allTimeRevenue,
-            'allTimeOrders' => $allTimeOrders,
+        return [
             'chartLabels' => $chartLabels,
             'chartSales' => $chartSales,
             'chartOrders' => $chartOrders,
             'paymentLabels' => $paymentLabels,
             'paymentCounts' => $paymentCounts,
             'paymentTotals' => $paymentTotals,
-        ]);
+        ];
     }
 }

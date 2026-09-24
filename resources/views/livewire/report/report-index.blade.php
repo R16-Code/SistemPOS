@@ -81,145 +81,212 @@
     </div>
 
     <!-- Visual Charts Section (Chart.js via Alpine) -->
-    <div x-data="{
-            trendChart: null,
-            paymentChart: null,
+    <div wire:ignore
+         x-data="{
             init() {
-                this.$nextTick(() => this.draw());
+                this.$nextTick(() => {
+                    this.initTrendChart(@js($chartLabels), @js($chartSales), @js($chartOrders));
+                    this.initPaymentChart(@js($paymentLabels), @js($paymentCounts));
+                });
             },
-            draw() {
-                if (typeof Chart === 'undefined') return;
-                if (this.trendChart) this.trendChart.destroy();
-                if (this.paymentChart) this.paymentChart.destroy();
+            destroyChart(id) {
+                const existing = (typeof Chart !== 'undefined') ? Chart.getChart(id) : null;
+                if (existing) {
+                    existing.destroy();
+                }
+            },
+            initTrendChart(labels, sales, orders) {
+                const canvas = document.getElementById('trendSalesChart');
+                if (!canvas || typeof Chart === 'undefined') return;
 
-                const ctxTrend = document.getElementById('trendSalesChart')?.getContext('2d');
-                if (ctxTrend) {
-                    this.trendChart = new Chart(ctxTrend, {
-                        type: 'line',
-                        data: {
-                            labels: @js($chartLabels),
-                            datasets: [
-                                {
-                                    label: 'Omset Penjualan (Rp)',
-                                    data: @js($chartSales),
-                                    borderColor: '#b45309',
-                                    backgroundColor: 'rgba(180, 83, 9, 0.08)',
-                                    borderWidth: 2.5,
-                                    fill: true,
-                                    tension: 0.35,
-                                    pointBackgroundColor: '#b45309',
-                                    pointRadius: 4,
-                                    pointHoverRadius: 6,
-                                    yAxisID: 'y'
-                                },
-                                {
-                                    label: 'Volume Transaksi',
-                                    data: @js($chartOrders),
-                                    borderColor: '#0284c7',
-                                    backgroundColor: 'transparent',
-                                    borderWidth: 2,
-                                    borderDash: [4, 4],
-                                    tension: 0.35,
-                                    pointBackgroundColor: '#0284c7',
-                                    pointRadius: 3,
-                                    yAxisID: 'y1'
-                                }
-                            ]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            interaction: { mode: 'index', intersect: false },
-                            plugins: {
-                                legend: { 
-                                    position: 'top', 
-                                    labels: { 
-                                        boxWidth: 12, 
-                                        font: { family: 'Plus Jakarta Sans', size: 11, weight: '600' } 
-                                    } 
-                                },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            if (context.datasetIndex === 0) {
-                                                return ' Omset: Rp ' + new Intl.NumberFormat('id-ID').format(context.raw);
-                                            }
-                                            return ' Transaksi: ' + context.raw + ' pesanan';
+                this.destroyChart('trendSalesChart');
+
+                const ctx = canvas.getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels || [],
+                        datasets: [
+                            {
+                                label: 'Omset Penjualan (Rp)',
+                                data: sales || [],
+                                borderColor: '#b45309',
+                                backgroundColor: 'rgba(180, 83, 9, 0.08)',
+                                borderWidth: 2.5,
+                                fill: true,
+                                tension: 0.35,
+                                pointBackgroundColor: '#b45309',
+                                pointRadius: 4,
+                                pointHoverRadius: 6,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: 'Volume Transaksi',
+                                data: orders || [],
+                                borderColor: '#0284c7',
+                                backgroundColor: 'transparent',
+                                borderWidth: 2,
+                                borderDash: [4, 4],
+                                tension: 0.35,
+                                pointBackgroundColor: '#0284c7',
+                                pointRadius: 3,
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: { 
+                                position: 'top', 
+                                labels: { 
+                                    boxWidth: 12, 
+                                    font: { family: 'Plus Jakarta Sans', size: 11, weight: '600' } 
+                                } 
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        if (context.datasetIndex === 0) {
+                                            return ' Omset: Rp ' + new Intl.NumberFormat('id-ID').format(context.raw);
                                         }
+                                        return ' Transaksi: ' + context.raw + ' pesanan';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { 
+                                grid: { display: false }, 
+                                ticks: { font: { size: 10 } } 
+                            },
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                grid: { color: '#f1f5f9' },
+                                ticks: {
+                                    font: { size: 10 },
+                                    callback: function(value) {
+                                        if (value >= 1000000) return 'Rp ' + (value / 1000000).toFixed(1) + 'jt';
+                                        if (value >= 1000) return 'Rp ' + (value / 1000).toFixed(0) + 'rb';
+                                        return 'Rp ' + value;
                                     }
                                 }
                             },
-                            scales: {
-                                x: { 
-                                    grid: { display: false }, 
-                                    ticks: { font: { size: 10 } } 
-                                },
-                                y: {
-                                    type: 'linear',
-                                    display: true,
-                                    position: 'left',
-                                    grid: { color: '#f1f5f9' },
-                                    ticks: {
-                                        font: { size: 10 },
-                                        callback: function(value) {
-                                            if (value >= 1000000) return 'Rp ' + (value / 1000000).toFixed(1) + 'jt';
-                                            if (value >= 1000) return 'Rp ' + (value / 1000).toFixed(0) + 'rb';
-                                            return 'Rp ' + value;
-                                        }
-                                    }
-                                },
-                                y1: {
-                                    type: 'linear',
-                                    display: true,
-                                    position: 'right',
-                                    grid: { drawOnChartArea: false },
-                                    ticks: { font: { size: 10 }, stepSize: 1 }
-                                }
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                grid: { drawOnChartArea: false },
+                                ticks: { font: { size: 10 }, stepSize: 1 }
                             }
                         }
-                    });
+                    }
+                });
+            },
+            initPaymentChart(labels, counts) {
+                const canvas = document.getElementById('paymentMethodChart');
+                const emptyState = document.getElementById('paymentEmptyState');
+                if (!canvas || typeof Chart === 'undefined') return;
+
+                this.destroyChart('paymentMethodChart');
+
+                const total = (counts || []).reduce((a, b) => a + Number(b), 0);
+
+                if (total <= 0) {
+                    canvas.style.display = 'none';
+                    if (emptyState) emptyState.style.display = 'flex';
+                    return;
                 }
 
-                const ctxPayment = document.getElementById('paymentMethodChart')?.getContext('2d');
-                if (ctxPayment) {
-                    this.paymentChart = new Chart(ctxPayment, {
-                        type: 'doughnut',
-                        data: {
-                            labels: @js($paymentLabels),
-                            datasets: [{
-                                data: @js($paymentCounts),
-                                backgroundColor: ['#b45309', '#059669', '#0284c7', '#64748b'],
-                                borderWidth: 2,
-                                borderColor: '#ffffff',
-                                hoverOffset: 4
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            cutout: '70%',
-                            plugins: {
-                                legend: { 
-                                    position: 'bottom', 
-                                    labels: { 
-                                        boxWidth: 12, 
-                                        font: { family: 'Plus Jakarta Sans', size: 11, weight: '500' } 
-                                    } 
-                                },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            return ' ' + context.label + ': ' + context.raw + ' transaksi';
-                                        }
+                canvas.style.display = 'block';
+                if (emptyState) emptyState.style.display = 'none';
+
+                const ctx = canvas.getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels || [],
+                        datasets: [{
+                            data: counts || [],
+                            backgroundColor: ['#b45309', '#059669', '#0284c7', '#64748b'],
+                            borderWidth: 2,
+                            borderColor: '#ffffff',
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: { 
+                                position: 'bottom', 
+                                labels: { 
+                                    boxWidth: 12, 
+                                    font: { family: 'Plus Jakarta Sans', size: 11, weight: '500' } 
+                                } 
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return ' ' + context.label + ': ' + context.raw + ' transaksi';
                                     }
                                 }
                             }
                         }
-                    });
+                    }
+                });
+            },
+            updateCharts(detail) {
+                const raw = detail;
+                const data = (raw && typeof raw === 'object' && 'chartLabels' in raw)
+                    ? raw
+                    : (Array.isArray(raw) && raw[0] && typeof raw[0] === 'object' && 'chartLabels' in raw[0])
+                        ? raw[0]
+                        : (raw && raw.detail && typeof raw.detail === 'object')
+                            ? (raw.detail.chartLabels ? raw.detail : (Array.isArray(raw.detail) ? raw.detail[0] : raw.detail))
+                            : raw;
+
+                if (!data || !data.chartLabels) return;
+
+                const trendChart = (typeof Chart !== 'undefined') ? Chart.getChart('trendSalesChart') : null;
+                if (trendChart) {
+                    trendChart.data.labels = data.chartLabels || [];
+                    trendChart.data.datasets[0].data = data.chartSales || [];
+                    trendChart.data.datasets[1].data = data.chartOrders || [];
+                    trendChart.update();
+                } else {
+                    this.initTrendChart(data.chartLabels, data.chartSales, data.chartOrders);
+                }
+
+                const totalPayments = (data.paymentCounts || []).reduce((a, b) => a + Number(b), 0);
+                const paymentCanvas = document.getElementById('paymentMethodChart');
+                const emptyState = document.getElementById('paymentEmptyState');
+
+                if (totalPayments > 0) {
+                    if (emptyState) emptyState.style.display = 'none';
+                    if (paymentCanvas) paymentCanvas.style.display = 'block';
+
+                    const paymentChart = (typeof Chart !== 'undefined') ? Chart.getChart('paymentMethodChart') : null;
+                    if (paymentChart) {
+                        paymentChart.data.labels = data.paymentLabels || [];
+                        paymentChart.data.datasets[0].data = data.paymentCounts || [];
+                        paymentChart.update();
+                    } else {
+                        this.initPaymentChart(data.paymentLabels, data.paymentCounts);
+                    }
+                } else {
+                    this.destroyChart('paymentMethodChart');
+                    if (paymentCanvas) paymentCanvas.style.display = 'none';
+                    if (emptyState) emptyState.style.display = 'flex';
                 }
             }
          }"
-         wire:key="charts-{{ md5(json_encode($chartLabels) . json_encode($chartSales) . json_encode($paymentLabels)) }}"
+         @charts-updated.window="updateCharts($event.detail)"
          class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         <!-- Chart 1: Daily/Hourly Trend -->
@@ -245,8 +312,16 @@
                 </div>
                 <div class="w-2 h-2 rounded-full bg-emerald-600"></div>
             </div>
+
             <div class="relative h-64 w-full flex items-center justify-center">
-                <canvas id="paymentMethodChart"></canvas>
+                <canvas id="paymentMethodChart" class="max-h-56"></canvas>
+                <div id="paymentEmptyState" class="absolute inset-0 flex flex-col items-center justify-center text-center p-4 bg-white" style="display: none;">
+                    <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
+                    </div>
+                    <p class="text-xs font-bold text-slate-600">Belum Ada Transaksi</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Komposisi pembayaran akan tampil setelah ada transaksi</p>
+                </div>
             </div>
         </div>
     </div>
@@ -297,7 +372,4 @@
             </table>
         </div>
     </div>
-
-    <!-- Load Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </div>
