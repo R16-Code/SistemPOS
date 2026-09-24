@@ -34,16 +34,31 @@
                     <tr class="hover:bg-slate-50/80 transition-colors">
                         <td class="px-5 py-4 whitespace-nowrap font-mono font-bold text-amber-800">{{ $p->sku }}</td>
                         <td class="px-5 py-4 min-w-50">
-                            <span class="font-bold text-slate-900 block">{{ $p->name }}</span>
-                            @if($p->variants->isNotEmpty())
-                                <div class="flex items-center gap-1.5 mt-1 flex-wrap">
-                                    <span class="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 whitespace-nowrap">
-                                        <svg class="w-3 h-3 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
-                                        <span>{{ $p->variants->count() }} Varian ({{ $p->variants->pluck('variant_group')->unique()->implode(', ') }})</span>
-                                    </span>
+                            <div class="flex items-center gap-3">
+                                <div class="w-11 h-11 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center relative aspect-square shadow-2xs">
+                                    @if($p->image)
+                                        <img src="{{ asset('storage/' . $p->image) }}" alt="{{ $p->name }}" class="w-full h-full object-cover">
+                                    @else
+                                        <div class="w-full h-full bg-amber-50/70 text-amber-700/60 flex items-center justify-center">
+                                            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                                                <path d="M2,21V19H20V21H2M20,8V5H18V8H20M20,3A2,2 0 0,1 22,5V8A2,2 0 0,1 20,10H18V13A4,4 0 0,1 14,17H8A4,4 0 0,1 4,13V3H20M16,5H6V13A2,2 0 0,0 8,15H14A2,2 0 0,0 16,13V5Z"/>
+                                            </svg>
+                                        </div>
+                                    @endif
                                 </div>
-                            @endif
-                            <span class="text-[11px] text-slate-400 line-clamp-1 mt-0.5">{{ $p->description }}</span>
+                                <div class="min-w-0 flex-1">
+                                    <span class="font-bold text-slate-900 block truncate">{{ $p->name }}</span>
+                                    @if($p->variants->isNotEmpty())
+                                        <div class="flex items-center gap-1.5 mt-1 flex-wrap">
+                                            <span class="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 whitespace-nowrap">
+                                                <svg class="w-3 h-3 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+                                                <span>{{ $p->variants->count() }} Varian ({{ $p->variants->pluck('variant_group')->unique()->implode(', ') }})</span>
+                                            </span>
+                                        </div>
+                                    @endif
+                                    <span class="text-[11px] text-slate-400 line-clamp-1 mt-0.5">{{ $p->description }}</span>
+                                </div>
+                            </div>
                         </td>
                         <td class="px-5 py-4 whitespace-nowrap font-medium text-slate-600">{{ $p->category->name ?? '-' }}</td>
                         <td class="px-5 py-4 whitespace-nowrap font-extrabold text-slate-900">Rp {{ number_format($p->price, 0, ',', '.') }}</td>
@@ -116,6 +131,75 @@
                         <label class="font-bold text-slate-700 block mb-1">Nama Produk</label>
                         <input type="text" wire:model="name" placeholder="Contoh: Kopi Susu Aren" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:outline-none focus:border-amber-700">
                         @error('name') <span class="text-rose-600 text-[11px] font-bold">{{ $message }}</span> @enderror
+                    </div>
+
+                    <!-- Upload Foto Menu Produk -->
+                    <div>
+                        <label class="font-bold text-slate-700 block mb-1">Foto Menu Produk (Opsional)</label>
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
+                            <!-- Preview Box (Aspect Square 1:1) -->
+                            <div class="relative w-24 h-24 rounded-2xl bg-white border border-slate-200/90 shadow-2xs overflow-hidden shrink-0 flex items-center justify-center aspect-square">
+                                @if($image)
+                                    <!-- Temporary Upload Preview -->
+                                    <img src="{{ $image->temporaryUrl() }}" alt="Preview Foto Menu" class="w-full h-full object-cover">
+                                    <button type="button" wire:click="clearNewImage" class="absolute top-1 right-1 w-6 h-6 rounded-full bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center shadow-md transition-all cursor-pointer" title="Batal ganti gambar">
+                                        <svg class="w-3.5 h-3.5 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                @elseif($existingImage && !$removeImage)
+                                    <!-- Existing Saved Image -->
+                                    <img src="{{ asset('storage/' . $existingImage) }}" alt="Foto Menu Tersimpan" class="w-full h-full object-cover">
+                                    <button type="button" wire:click="deleteExistingImage" class="absolute top-1 right-1 w-6 h-6 rounded-full bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center shadow-md transition-all cursor-pointer" title="Hapus foto saat ini">
+                                        <svg class="w-3.5 h-3.5 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                @else
+                                    <!-- Fallback Icon -->
+                                    <div class="text-center p-2 text-slate-400">
+                                        <svg class="w-8 h-8 mx-auto text-slate-300 stroke-[1.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/>
+                                        </svg>
+                                        <span class="text-[9px] font-semibold text-slate-400 mt-1 block">Rasio 1:1</span>
+                                    </div>
+                                @endif
+
+                                <!-- Loading Spinner -->
+                                <div wire:loading wire:target="image" class="absolute inset-0 bg-slate-900/60 backdrop-blur-xs flex flex-col items-center justify-center text-white">
+                                    <svg class="animate-spin w-5 h-5 text-white mb-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <span class="text-[8px] font-bold">Upload...</span>
+                                </div>
+                            </div>
+
+                            <!-- Upload Controller & Ratio Rules Note -->
+                            <div class="flex-1 space-y-2 w-full">
+                                <div class="flex items-center gap-2">
+                                    <label class="cursor-pointer inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-slate-300 hover:border-amber-700 hover:bg-amber-50/50 text-slate-700 text-xs font-bold transition-all shadow-2xs">
+                                        <svg class="w-4 h-4 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                        <span>{{ $image || ($existingImage && !$removeImage) ? 'Ganti Foto Produk' : 'Pilih Foto Produk' }}</span>
+                                        <input type="file" wire:model="image" accept="image/png,image/jpeg,image/jpg,image/webp" class="hidden">
+                                    </label>
+                                    @if($existingImage && !$removeImage && !$image)
+                                        <button type="button" wire:click="deleteExistingImage" class="px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition-colors cursor-pointer">
+                                            Hapus Foto
+                                        </button>
+                                    @endif
+                                </div>
+
+                                <!-- Catatan Rasio & Ukuran File -->
+                                <div class="p-2.5 rounded-xl bg-amber-50/80 border border-amber-200/70 text-[11px] text-amber-950 space-y-0.5">
+                                    <div class="flex items-center gap-1.5 font-bold">
+                                        <svg class="w-3.5 h-3.5 text-amber-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        <span>Catatan Foto Menu:</span>
+                                    </div>
+                                    <p class="text-slate-600 pl-5 leading-relaxed">
+                                        • Rasio gambar disarankan <strong>1:1 (Persegi/Square)</strong> agar tampil optimal pada kasir POS dan menu QR meja.<br>
+                                        • Format file yang didukung: <strong>JPG, JPEG, PNG, WebP</strong> (Ukuran maksimal: <strong>2MB</strong>).
+                                    </p>
+                                </div>
+                                @error('image') <span class="text-rose-600 text-[11px] font-bold block">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">

@@ -147,13 +147,17 @@
 
                         <div>
                             <!-- Product Icon / Image Card -->
-                            <div class="w-full h-20 sm:h-28 rounded-xl {{ $isOut ? 'bg-slate-200/70' : 'bg-amber-50 border border-amber-100 group-hover:bg-amber-100/60' }} mb-2.5 sm:mb-3 flex items-center justify-center relative overflow-hidden transition-colors">
-                                <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-full {{ $isOut ? 'bg-slate-300 text-slate-500' : 'bg-white shadow-sm text-amber-700' }} flex items-center justify-center">
-                                    <svg class="w-5 h-5 sm:w-6 sm:h-6 fill-current" viewBox="0 0 24 24">
-                                        <path d="M2,21V19H20V21H2M20,8V5H18V8H20M20,3A2,2 0 0,1 22,5V8A2,2 0 0,1 20,10H18V13A4,4 0 0,1 14,17H8A4,4 0 0,1 4,13V3H20M16,5H6V13A2,2 0 0,0 8,15H14A2,2 0 0,0 16,13V5Z"/>
-                                    </svg>
-                                </div>
-                                <span class="absolute top-1.5 right-1.5 px-1.5 py-0.2 rounded bg-white/90 text-[9px] font-mono font-semibold text-slate-600 border border-slate-200 shadow-2xs">
+                            <div class="w-full h-24 sm:h-28 rounded-xl {{ $isOut ? 'bg-slate-200/70' : 'bg-amber-50/60 border border-slate-100' }} mb-2.5 sm:mb-3 flex items-center justify-center relative overflow-hidden transition-colors">
+                                @if($product->image)
+                                    <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                @else
+                                    <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-full {{ $isOut ? 'bg-slate-300 text-slate-500' : 'bg-white shadow-sm text-amber-700' }} flex items-center justify-center">
+                                        <svg class="w-5 h-5 sm:w-6 sm:h-6 fill-current" viewBox="0 0 24 24">
+                                            <path d="M2,21V19H20V21H2M20,8V5H18V8H20M20,3A2,2 0 0,1 22,5V8A2,2 0 0,1 20,10H18V13A4,4 0 0,1 14,17H8A4,4 0 0,1 4,13V3H20M16,5H6V13A2,2 0 0,0 8,15H14A2,2 0 0,0 16,13V5Z"/>
+                                        </svg>
+                                    </div>
+                                @endif
+                                <span class="absolute top-1.5 right-1.5 px-1.5 py-0.2 rounded bg-white/90 backdrop-blur-xs text-[9px] font-mono font-semibold text-slate-600 border border-slate-200 shadow-2xs">
                                     {{ $product->sku }}
                                 </span>
                             </div>

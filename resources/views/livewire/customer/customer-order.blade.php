@@ -157,8 +157,10 @@
                 <div class="bg-white rounded-2xl p-3.5 border border-slate-200/90 shadow-xs flex items-center justify-between gap-3 transition-all hover:border-amber-300">
                     <div class="flex items-center gap-3 min-w-0">
                         <!-- Product Thumbnail -->
-                        <div class="w-16 h-16 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center relative">
-                            @if($product->image_path)
+                        <div class="w-16 h-16 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center relative aspect-square">
+                            @if($product->image)
+                                <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
+                            @elseif($product->image_path)
                                 <img src="{{ asset('storage/' . $product->image_path) }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
                             @else
                                 <svg class="w-7 h-7 text-amber-800/40" fill="currentColor" viewBox="0 0 24 24">

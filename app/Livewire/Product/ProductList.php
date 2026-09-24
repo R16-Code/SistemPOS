@@ -4,13 +4,16 @@ namespace App\Livewire\Product;
 
 use App\Models\Category;
 use App\Models\Product;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
 #[Title('Kelola Produk - BrewPOS')]
 class ProductList extends Component
 {
+    use WithFileUploads;
     use WithPagination;
 
     public $search = '';
@@ -36,6 +39,13 @@ class ProductList extends Component
     public $description = '';
 
     public $is_available = true;
+
+    // Image upload state
+    public $image = null;
+
+    public $existingImage = null;
+
+    public $removeImage = false;
 
     // Variant options state
     public $hasVariants = false;
@@ -91,6 +101,7 @@ class ProductList extends Component
             'description' => 'nullable|string',
             'is_available' => 'boolean',
             'hasVariants' => 'boolean',
+            'image' => 'nullable|image|max:2048',
         ];
 
         if ($this->hasVariants) {
@@ -112,6 +123,8 @@ class ProductList extends Component
             'variants.*.extra_price.required' => 'Tambahan harga wajib diisi (isi 0 jika gratis).',
             'variants.*.extra_price.numeric' => 'Tambahan harga harus berupa angka.',
             'variants.*.extra_price.min' => 'Tambahan harga minimal 0.',
+            'image.image' => 'File harus berupa gambar (JPG, JPEG, PNG, atau WebP).',
+            'image.max' => 'Ukuran file gambar maksimal 2MB.',
         ];
     }
 
@@ -201,12 +214,40 @@ class ProductList extends Component
         }
 
         $this->isEditMode = true;
+        $this->existingImage = $product->image;
+        $this->image = null;
+        $this->removeImage = false;
         $this->showFormModal = true;
+    }
+
+    public function deleteExistingImage()
+    {
+        $this->removeImage = true;
+        $this->existingImage = null;
+    }
+
+    public function clearNewImage()
+    {
+        $this->image = null;
     }
 
     public function saveProduct()
     {
         $this->validate();
+
+        $imagePath = $this->existingImage;
+
+        if ($this->image) {
+            if ($this->existingImage && Storage::disk('public')->exists($this->existingImage)) {
+                Storage::disk('public')->delete($this->existingImage);
+            }
+            $imagePath = $this->image->store('products', 'public');
+        } elseif ($this->removeImage) {
+            if ($this->existingImage && Storage::disk('public')->exists($this->existingImage)) {
+                Storage::disk('public')->delete($this->existingImage);
+            }
+            $imagePath = null;
+        }
 
         if ($this->isEditMode) {
             $product = Product::findOrFail($this->selectedProductId);
@@ -218,6 +259,7 @@ class ProductList extends Component
                 'stock' => $this->stock,
                 'description' => $this->description,
                 'is_available' => $this->is_available,
+                'image' => $imagePath,
             ]);
         } else {
             $product = Product::create([
@@ -228,6 +270,7 @@ class ProductList extends Component
                 'stock' => $this->stock,
                 'description' => $this->description,
                 'is_available' => $this->is_available,
+                'image' => $imagePath,
             ]);
         }
 
@@ -258,6 +301,9 @@ class ProductList extends Component
     public function deleteProduct($id)
     {
         $product = Product::findOrFail($id);
+        if ($product->image && Storage::disk('public')->exists($product->image)) {
+            Storage::disk('public')->delete($product->image);
+        }
         $product->delete();
     }
 
@@ -279,6 +325,9 @@ class ProductList extends Component
         $this->is_available = true;
         $this->hasVariants = false;
         $this->variants = [];
+        $this->image = null;
+        $this->existingImage = null;
+        $this->removeImage = false;
         $this->resetValidation();
     }
 
