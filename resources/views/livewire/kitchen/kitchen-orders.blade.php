@@ -31,7 +31,7 @@
                 class="px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 {{ $activeTab === 'all_active' ? 'bg-amber-700 text-white shadow-sm' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200' }}">
             <span>Semua Aktif</span>
             <span class="px-1.5 py-0.5 rounded-md text-[10px] {{ $activeTab === 'all_active' ? 'bg-amber-800 text-amber-100' : 'bg-slate-100 text-slate-700' }}">
-                {{ $pendingCount + $cookingCount }}
+                {{ $pendingCount + $cookingCount + $readyCount }}
             </span>
         </button>
 
@@ -63,6 +63,17 @@
         </button>
 
         <button type="button" 
+                wire:click="setTab('served')" 
+                style="{{ $activeTab === 'served' ? 'background-color: #0f766e; color: #ffffff;' : '' }}"
+                class="px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 {{ $activeTab === 'served' ? 'bg-teal-700 text-white shadow-sm' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200' }}">
+            <span>Telah Disajikan</span>
+            <span style="{{ $activeTab === 'served' ? 'background-color: #115e59; color: #ffffff;' : '' }}"
+                  class="px-1.5 py-0.5 rounded-md text-[10px] {{ $activeTab === 'served' ? 'bg-teal-800 text-white' : 'bg-teal-100 text-teal-800' }}">
+                {{ $servedCount }}
+            </span>
+        </button>
+
+        <button type="button" 
                 wire:click="setTab('completed')" 
                 class="px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 {{ $activeTab === 'completed' ? 'bg-slate-800 text-white shadow-sm' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200' }}">
             <span>Selesai Hari Ini</span>
@@ -75,10 +86,10 @@
     <!-- Orders Cards Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         @forelse($orders as $order)
-            <div wire:key="order-card-{{ $order->id }}" class="bg-white border rounded-2xl shadow-xs overflow-hidden flex flex-col justify-between transition-all {{ $order->order_status === 'cooking' ? 'border-blue-300 ring-1 ring-blue-100' : ($order->order_status === 'ready' ? 'border-emerald-300 ring-1 ring-emerald-100' : 'border-slate-200/90') }}">
+            <div wire:key="order-card-{{ $order->id }}" class="bg-white border rounded-2xl shadow-xs overflow-hidden flex flex-col justify-between transition-all {{ $order->order_status === 'cooking' ? 'border-blue-300 ring-1 ring-blue-100' : ($order->order_status === 'ready' ? 'border-emerald-300 ring-1 ring-emerald-100' : ($order->order_status === 'served' ? 'border-teal-300 ring-1 ring-teal-100' : 'border-slate-200/90')) }}">
                 
                 <!-- Card Header -->
-                <div class="p-4 border-b border-slate-100 {{ $order->order_status === 'cooking' ? 'bg-blue-50/40' : ($order->order_status === 'ready' ? 'bg-emerald-50/40' : 'bg-slate-50/60') }}">
+                <div class="p-4 border-b border-slate-100 {{ $order->order_status === 'cooking' ? 'bg-blue-50/40' : ($order->order_status === 'ready' ? 'bg-emerald-50/40' : ($order->order_status === 'served' ? 'bg-teal-50/40' : 'bg-slate-50/60')) }}">
                     <div class="flex items-start justify-between gap-3">
                         <div>
                             <span class="font-mono font-extrabold text-sm text-slate-900 block leading-tight whitespace-nowrap">{{ $order->invoice_number }}</span>
@@ -172,8 +183,12 @@
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
                                 <span>Siap Saji</span>
                             </span>
+                        @elseif($order->order_status === 'served')
+                            <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-[11px] font-bold whitespace-nowrap bg-teal-100 text-teal-800 border border-teal-200" style="background-color: #ccfbf1; color: #115e59; border-color: #99f6e4;">
+                                <span>Telah Disajikan</span>
+                            </span>
                         @else
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold whitespace-nowrap bg-slate-100 text-slate-600 border border-slate-200">
+                            <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-[11px] font-bold whitespace-nowrap bg-slate-100 text-slate-600 border border-slate-200">
                                 <span>Selesai</span>
                             </span>
                         @endif
@@ -199,11 +214,30 @@
                                 <span>Siap Saji</span>
                             </button>
                         @elseif($order->order_status === 'ready')
+                            @if($order->order_type === 'dine_in')
+                                <button type="button" 
+                                        wire:click="updateOrderStatus({{ $order->id }}, 'served')" 
+                                        style="background-color: #0f766e; color: #ffffff;"
+                                        title="Tandai pesanan telah diantar ke meja (meja tetap terisi)"
+                                        class="px-3.5 py-1.5 bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    <span>Telah Disajikan</span>
+                                </button>
+                            @else
+                                <button type="button" 
+                                        wire:click="updateOrderStatus({{ $order->id }}, 'completed')" 
+                                        class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span>Serahkan / Selesai</span>
+                                </button>
+                            @endif
+                        @elseif($order->order_status === 'served')
                             <button type="button" 
                                     wire:click="updateOrderStatus({{ $order->id }}, 'completed')" 
-                                    class="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
+                                    wire:confirm="Tandai pesanan ini selesai dan kosongkan meja {{ $order->table->table_number ?? '' }}?"
+                                    class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                <span>Selesaikan</span>
+                                <span>Selesaikan Pesanan</span>
                             </button>
                         @endif
                     </div>
@@ -215,8 +249,13 @@
                 <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 mx-auto flex items-center justify-center mb-3">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                 </div>
-                <h4 class="font-bold text-slate-700 text-sm">Tidak ada antrian pesanan</h4>
-                <p class="text-xs text-slate-400 mt-0.5">Pesanan baru yang dibuat di kasir akan langsung muncul di sini secara otomatis</p>
+                @if($activeTab === 'served')
+                    <h4 class="font-bold text-slate-700 text-sm">Belum ada pesanan yang sedang disantap</h4>
+                    <p class="text-xs text-slate-400 mt-0.5">Pesanan yang ditandai "Telah Disajikan" dari tab Siap Disajikan akan muncul di sini selama tamu menikmati hidangan</p>
+                @else
+                    <h4 class="font-bold text-slate-700 text-sm">Tidak ada antrian pesanan</h4>
+                    <p class="text-xs text-slate-400 mt-0.5">Pesanan baru yang dibuat di kasir akan langsung muncul di sini secara otomatis</p>
+                @endif
             </div>
         @endforelse
     </div>

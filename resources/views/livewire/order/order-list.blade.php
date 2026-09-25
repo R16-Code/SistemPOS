@@ -45,6 +45,7 @@
                 <option value="pending">Menunggu (Pending)</option>
                 <option value="cooking">Sedang Diracik (Cooking)</option>
                 <option value="ready">Siap Saji (Ready)</option>
+                <option value="served">Telah Disajikan (Served)</option>
                 <option value="completed">Selesai (Completed)</option>
             </select>
 
@@ -138,6 +139,10 @@
                                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                         <span>Siap Saji</span>
                                     </span>
+                                @elseif($order->order_status === 'served')
+                                    <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-teal-100 text-teal-900 border border-teal-200" style="background-color: #ccfbf1; color: #134e4a; border-color: #99f6e4;">
+                                        <span>Telah Disajikan</span>
+                                    </span>
                                 @elseif($order->order_status === 'completed')
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200">
                                         <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
@@ -202,6 +207,10 @@
                             @elseif($selectedOrderDetail->order_status === 'ready')
                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-900 border border-emerald-200">
                                     Siap Saji
+                                </span>
+                            @elseif($selectedOrderDetail->order_status === 'served')
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-teal-100 text-teal-900 border border-teal-200">
+                                    Telah Disajikan
                                 </span>
                             @elseif($selectedOrderDetail->order_status === 'completed')
                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200">
