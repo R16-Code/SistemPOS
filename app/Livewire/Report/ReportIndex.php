@@ -12,18 +12,18 @@ use Livewire\Component;
 #[Title('Laporan Penjualan - BrewPOS')]
 class ReportIndex extends Component
 {
-    public $dateRange = 'today'; // today, this_week, this_month, all, custom
+    public string $dateRange = 'today'; // today, this_week, this_month, all, custom
 
-    public $startDate = null;
+    public ?string $startDate = null;
 
-    public $endDate = null;
+    public ?string $endDate = null;
 
     public function mount()
     {
         $this->setDateRange('today');
     }
 
-    public function setDateRange($range)
+    public function setDateRange(string $range): void
     {
         $this->dateRange = $range;
 

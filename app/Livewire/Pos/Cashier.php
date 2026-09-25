@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Setting;
 use App\Models\Table;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -16,41 +17,41 @@ use Livewire\Component;
 #[Title('Kasir POS - BrewPOS')]
 class Cashier extends Component
 {
-    public $search = '';
+    public string $search = '';
 
-    public $selectedCategory = null;
+    public ?int $selectedCategory = null;
 
-    public $cart = [];
+    public array $cart = [];
 
-    public $customerName = 'Guest';
+    public string $customerName = 'Guest';
 
-    public $orderType = 'dine_in';
+    public string $orderType = 'dine_in';
 
-    public $selectedTableId = null;
+    public ?int $selectedTableId = null;
 
-    public $showVariantModal = false;
+    public bool $showVariantModal = false;
 
-    public $selectedProduct = null;
+    public ?Product $selectedProduct = null;
 
-    public $selectedVariants = [];
+    public array $selectedVariants = [];
 
-    public $itemNotes = '';
+    public string $itemNotes = '';
 
-    public $showPaymentModal = false;
+    public bool $showPaymentModal = false;
 
-    public $showReceiptModal = false;
+    public bool $showReceiptModal = false;
 
-    public $paymentMethod = 'cash';
+    public string $paymentMethod = 'cash';
 
-    public $paidAmount = 0;
+    public float|int $paidAmount = 0;
 
-    public $discountAmount = 0;
+    public float|int $discountAmount = 0;
 
-    public $taxRate = 0.11;
+    public float $taxRate = 0.11;
 
-    public $taxName = 'PPN';
+    public string $taxName = 'PPN';
 
-    public $completedOrder = null;
+    public ?Order $completedOrder = null;
 
     public bool $showIncomingOrdersModal = false;
 
@@ -75,12 +76,12 @@ class Cashier extends Component
         }
     }
 
-    public function selectCategory($categoryId)
+    public function selectCategory(?int $categoryId): void
     {
         $this->selectedCategory = $this->selectedCategory === $categoryId ? null : $categoryId;
     }
 
-    public function selectProductForOrder($productId)
+    public function selectProductForOrder(int $productId): void
     {
         $product = Product::with('variants')->find($productId);
         if (! $product || ! $product->is_available || $product->stock <= 0) {
@@ -174,7 +175,7 @@ class Cashier extends Component
         }
     }
 
-    public function updateQuantity($key, $delta)
+    public function updateQuantity(string $key, int $delta): void
     {
         if (isset($this->cart[$key])) {
             $newQty = $this->cart[$key]['quantity'] + $delta;
@@ -187,7 +188,7 @@ class Cashier extends Component
         }
     }
 
-    public function removeFromCart($key)
+    public function removeFromCart(string $key): void
     {
         unset($this->cart[$key]);
     }
@@ -235,7 +236,7 @@ class Cashier extends Component
         $this->showPaymentModal = false;
     }
 
-    public function setQuickMoney($amount)
+    public function setQuickMoney(float|int $amount): void
     {
         $this->paidAmount = $amount;
     }
@@ -255,7 +256,7 @@ class Cashier extends Component
         DB::beginTransaction();
         try {
             $invoiceNumber = 'TRX-'.date('Ymd').'-'.str_pad(Order::whereDate('created_at', now())->count() + 1, 4, '0', STR_PAD_LEFT);
-            $userId = auth()->id() ?? 2;
+            $userId = Auth::id() ?? 2;
 
             $order = Order::create([
                 'invoice_number' => $invoiceNumber,
@@ -361,7 +362,7 @@ class Cashier extends Component
             $changeAmount = max(0, $paidAmount - (float) $order->total_amount);
 
             $order->update([
-                'user_id' => auth()->id() ?? 1,
+                'user_id' => Auth::id() ?? 1,
                 'payment_method' => $isPaid ? $order->payment_method : $this->confirmPaymentMethod,
                 'payment_status' => 'paid',
                 'order_status' => 'pending',
