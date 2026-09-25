@@ -9,7 +9,7 @@ use Livewire\Component;
 #[Title('Antrian Pesanan Dapur - BrewPOS')]
 class KitchenOrders extends Component
 {
-    public string $activeTab = 'all_active'; // all_active, pending, cooking, ready, completed
+    public string $activeTab = 'all_active'; // all_active, pending, cooking, ready, served, completed
 
     public string $search = '';
 
@@ -20,7 +20,7 @@ class KitchenOrders extends Component
 
     public function updateOrderStatus(int $orderId, string $status): void
     {
-        $validStatuses = ['pending', 'cooking', 'ready', 'completed', 'cancelled'];
+        $validStatuses = ['pending', 'cooking', 'ready', 'served', 'completed', 'cancelled'];
         if (! in_array($status, $validStatuses)) {
             return;
         }
@@ -30,8 +30,21 @@ class KitchenOrders extends Component
             'order_status' => $status,
         ]);
 
+        // When served for dine-in, ensure the table remains occupied while customer enjoys meal
+        if ($status === 'served' && $order->table_id) {
+            $order->table?->update(['status' => 'occupied']);
+        }
+
+        // When completed, only free table if there are no other active orders at this table
         if ($status === 'completed' && $order->table_id) {
-            $order->table?->update(['status' => 'available']);
+            $hasOtherActiveOrders = Order::where('table_id', $order->table_id)
+                ->where('id', '!=', $order->id)
+                ->whereIn('order_status', ['pending_confirmation', 'pending', 'cooking', 'ready', 'served'])
+                ->exists();
+
+            if (! $hasOtherActiveOrders) {
+                $order->table?->update(['status' => 'available']);
+            }
         }
     }
 
@@ -41,6 +54,7 @@ class KitchenOrders extends Component
         $pendingCount = Order::where('order_status', 'pending')->count();
         $cookingCount = Order::where('order_status', 'cooking')->count();
         $readyCount = Order::where('order_status', 'ready')->count();
+        $servedCount = Order::where('order_status', 'served')->whereDate('created_at', now())->count();
         $completedCount = Order::whereDate('created_at', now())->where('order_status', 'completed')->count();
 
         $query = Order::with(['table', 'items', 'user']);
@@ -53,13 +67,15 @@ class KitchenOrders extends Component
         }
 
         if ($this->activeTab === 'all_active') {
-            $query->whereIn('order_status', ['pending', 'cooking'])->orderBy('created_at', 'asc');
+            $query->whereIn('order_status', ['pending', 'cooking', 'ready'])->orderBy('created_at', 'asc');
         } elseif ($this->activeTab === 'pending') {
             $query->where('order_status', 'pending')->orderBy('created_at', 'asc');
         } elseif ($this->activeTab === 'cooking') {
             $query->where('order_status', 'cooking')->orderBy('created_at', 'asc');
         } elseif ($this->activeTab === 'ready') {
             $query->where('order_status', 'ready')->orderBy('updated_at', 'desc');
+        } elseif ($this->activeTab === 'served') {
+            $query->where('order_status', 'served')->whereDate('created_at', now())->orderBy('updated_at', 'desc');
         } elseif ($this->activeTab === 'completed') {
             $query->where('order_status', 'completed')->whereDate('created_at', now())->orderBy('updated_at', 'desc');
         }
@@ -71,6 +87,7 @@ class KitchenOrders extends Component
             'pendingCount' => $pendingCount,
             'cookingCount' => $cookingCount,
             'readyCount' => $readyCount,
+            'servedCount' => $servedCount,
             'completedCount' => $completedCount,
         ]);
     }

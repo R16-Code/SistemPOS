@@ -41,4 +41,19 @@ class Table extends Model
     {
         return $this->hasMany(Order::class);
     }
+
+    public function activeOrders(): HasMany
+    {
+        return $this->hasMany(Order::class)
+            ->whereIn('order_status', ['pending_confirmation', 'pending', 'cooking', 'ready', 'served'])
+            ->latest('id');
+    }
+
+    public function currentSessionOrder(): ?Order
+    {
+        return $this->orders()
+            ->whereIn('order_status', ['pending_confirmation', 'pending', 'cooking', 'ready', 'served'])
+            ->oldest('id')
+            ->first();
+    }
 }

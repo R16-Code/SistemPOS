@@ -75,7 +75,7 @@ class OrderList extends Component
             return;
         }
 
-        $validStatuses = ['pending', 'cooking', 'ready', 'completed', 'cancelled'];
+        $validStatuses = ['pending', 'cooking', 'ready', 'served', 'completed', 'cancelled'];
         if (! in_array($status, $validStatuses)) {
             return;
         }
@@ -85,8 +85,19 @@ class OrderList extends Component
             'order_status' => $status,
         ]);
 
+        if ($status === 'served' && $order->table_id) {
+            $order->table?->update(['status' => 'occupied']);
+        }
+
         if ($status === 'completed' && $order->table_id) {
-            $order->table?->update(['status' => 'available']);
+            $hasOtherActive = Order::where('table_id', $order->table_id)
+                ->where('id', '!=', $order->id)
+                ->whereIn('order_status', ['pending_confirmation', 'pending', 'cooking', 'ready', 'served'])
+                ->exists();
+
+            if (! $hasOtherActive) {
+                $order->table?->update(['status' => 'available']);
+            }
         }
     }
 

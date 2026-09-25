@@ -103,6 +103,22 @@
                 </p>
             </div>
 
+        @elseif($order->order_status === 'served')
+            <div class="w-16 h-16 mx-auto rounded-2xl bg-teal-100 border border-teal-200 flex items-center justify-center text-teal-800">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+            </div>
+            <div>
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-teal-100 text-teal-800">
+                    Telah Disajikan
+                </span>
+                <h2 class="text-lg font-extrabold text-slate-900 mt-2">Pesanan Telah Disajikan!</h2>
+                <p class="text-xs text-slate-600 mt-1 max-w-xs mx-auto leading-relaxed">
+                    Makanan & minuman sudah disajikan di meja {{ $table->table_number }}. Selamat menikmati santapan Anda!
+                </p>
+            </div>
+
         @elseif($order->order_status === 'completed')
             <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -115,7 +131,7 @@
                 </span>
                 <h2 class="text-lg font-extrabold text-slate-900 mt-2">Selamat Menikmati!</h2>
                 <p class="text-xs text-slate-600 mt-1 max-w-xs mx-auto leading-relaxed">
-                    Terima kasih telah memesan di BrewPOS. Semoga Anda menikmati santapan hari ini!
+                    Terima kasih telah berkunjung ke BrewPOS. Semoga hari Anda menyenangkan!
                 </p>
             </div>
 
@@ -139,12 +155,12 @@
         <!-- Progress Steps Tracker -->
         @if($order->order_status !== 'cancelled')
             @php
-                $statusOrder = ['pending_confirmation' => 1, 'pending' => 2, 'cooking' => 3, 'ready' => 4, 'completed' => 5];
+                $statusOrder = ['pending_confirmation' => 1, 'pending' => 2, 'cooking' => 3, 'ready' => 4, 'served' => 5, 'completed' => 5];
                 $currentStep = $statusOrder[$order->order_status] ?? 1;
             @endphp
             <div class="pt-4 border-t border-slate-100 flex items-center justify-between text-center relative px-2">
                 <div class="absolute left-6 right-6 top-7 h-0.5 bg-slate-200 z-0">
-                    <div class="h-full bg-amber-700 transition-all duration-300" style="width: {{ min(100, max(0, ($currentStep - 1) * 33)) }}%;"></div>
+                    <div class="h-full bg-amber-700 transition-all duration-300" style="width: {{ min(100, max(0, ($currentStep - 1) * 25)) }}%;"></div>
                 </div>
 
                 <div class="flex flex-col items-center relative z-10">
@@ -173,6 +189,13 @@
                         4
                     </div>
                     <span class="text-[10px] font-semibold text-slate-700 mt-1">Siap</span>
+                </div>
+
+                <div class="flex flex-col items-center relative z-10">
+                    <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold {{ $currentStep >= 5 ? 'bg-teal-700 text-white' : 'bg-slate-200 text-slate-500' }}">
+                        5
+                    </div>
+                    <span class="text-[10px] font-semibold text-slate-700 mt-1">Saji</span>
                 </div>
             </div>
         @endif

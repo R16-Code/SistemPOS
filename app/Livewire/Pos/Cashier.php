@@ -404,7 +404,8 @@ class Cashier extends Component
 
             if ($order->table_id) {
                 $hasOtherOrders = Order::where('table_id', $order->table_id)
-                    ->whereIn('order_status', ['pending', 'cooking', 'ready'])
+                    ->where('id', '!=', $order->id)
+                    ->whereIn('order_status', ['pending_confirmation', 'pending', 'cooking', 'ready', 'served'])
                     ->exists();
 
                 if (! $hasOtherOrders) {

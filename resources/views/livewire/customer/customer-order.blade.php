@@ -73,6 +73,30 @@
         @endforeach
     </div>
 
+    <!-- Active Table Session Notice (for multi-device / add-ons) -->
+    @if($this->primaryActiveOrder)
+        <div class="mx-4 mt-3 p-3.5 rounded-2xl bg-amber-50/90 border border-amber-200/90 text-amber-950 text-xs shadow-2xs space-y-2">
+            <div class="flex items-start gap-2.5">
+                <div class="w-7 h-7 rounded-xl bg-amber-200/80 border border-amber-300 text-amber-900 flex items-center justify-center shrink-0 mt-0.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="font-bold text-amber-900 text-xs">Sesi Meja Sedang Aktif:</span>
+                        <span class="px-2 py-0.5 rounded-md text-[11px] font-extrabold bg-amber-200/80 text-amber-900">{{ $this->primaryActiveOrder->customer_name }}</span>
+                    </div>
+                    <p class="text-[11px] text-amber-800/90 mt-1 leading-relaxed">
+                        Meja {{ $table->table_number }} sedang terisi. Anda dapat memesan menu tambahan (add-on) dari perangkat ini untuk meja yang sama.
+                    </p>
+                </div>
+            </div>
+            <div class="pt-2 border-t border-amber-200/70 flex items-center justify-between text-[11px] text-amber-700">
+                <span>Bukan rombongan Anda atau meja kosong?</span>
+                <span class="font-bold text-amber-900 bg-white/80 px-2 py-0.5 rounded-md border border-amber-300 shadow-2xs">Panggil Pelayan</span>
+            </div>
+        </div>
+    @endif
+
     <!-- Active Orders Alert Banner (if any active order on this table) -->
     @if($this->activeOrders->isNotEmpty())
         <div wire:poll.5s class="px-4 pt-3 space-y-2.5">
@@ -98,6 +122,11 @@
                             'label' => 'Siap Saji',
                             'badge' => 'bg-emerald-400/25 text-emerald-100 border-emerald-400/40',
                             'dot' => 'bg-emerald-400 animate-ping',
+                        ],
+                        'served' => [
+                            'label' => 'Telah Disajikan',
+                            'badge' => 'bg-teal-400/25 text-teal-100 border-teal-400/40',
+                            'dot' => 'bg-teal-400',
                         ],
                     ];
                     $cfg = $statusConfig[$activeOrder->order_status] ?? [
@@ -396,6 +425,13 @@
                         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
                             Informasi Pemesan
                         </label>
+
+                        @if($this->primaryActiveOrder)
+                            <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-900 flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                                <span>Pesanan ini dicatat sebagai <strong>Pesanan Tambahan (Add-on)</strong> pada sesi <strong>{{ $this->primaryActiveOrder->customer_name }}</strong> ({{ $table->table_number }}).</span>
+                            </div>
+                        @endif
 
                         <div>
                             <label class="block text-xs font-medium text-slate-600 mb-1">

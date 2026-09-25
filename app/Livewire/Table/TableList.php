@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Table;
 
+use App\Models\Order;
 use App\Models\Table;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -93,6 +94,22 @@ class TableList extends Component
         }
     }
 
+    public function clearTable(int $tableId): void
+    {
+        $table = Table::findOrFail($tableId);
+
+        // Mark all active orders for this table as completed
+        Order::where('table_id', $tableId)
+            ->whereIn('order_status', ['pending_confirmation', 'pending', 'cooking', 'ready', 'served'])
+            ->update([
+                'order_status' => 'completed',
+            ]);
+
+        $table->update(['status' => 'available']);
+
+        session()->flash('message', "Meja {$table->table_number} berhasil dikosongkan dan siap untuk pelanggan berikutnya.");
+    }
+
     public function deleteTable($id)
     {
         $table = Table::findOrFail($id);
@@ -137,7 +154,7 @@ class TableList extends Component
 
     public function render()
     {
-        $tables = Table::all();
+        $tables = Table::with(['activeOrders.items'])->get();
 
         return view('livewire.table.table-list', [
             'tables' => $tables,

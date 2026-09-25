@@ -209,9 +209,18 @@ class CustomerOrder extends Component
         return Order::with(['items'])
             ->where('table_id', $this->table->id)
             ->where('created_at', '>=', now()->subHours(12))
-            ->whereIn('order_status', ['pending_confirmation', 'pending', 'cooking', 'ready'])
+            ->whereIn('order_status', ['pending_confirmation', 'pending', 'cooking', 'ready', 'served'])
             ->latest('id')
             ->get();
+    }
+
+    public function getPrimaryActiveOrderProperty(): ?Order
+    {
+        return Order::where('table_id', $this->table->id)
+            ->where('created_at', '>=', now()->subHours(12))
+            ->whereIn('order_status', ['pending_confirmation', 'pending', 'cooking', 'ready', 'served'])
+            ->oldest('id')
+            ->first();
     }
 
     public function openCart(): void
@@ -259,6 +268,13 @@ class CustomerOrder extends Component
 
             $isGateway = $this->paymentChoice === 'gateway';
 
+            $hasActiveSession = $this->primaryActiveOrder !== null;
+            $finalNotes = trim($this->customerNotes);
+            if ($hasActiveSession) {
+                $tag = '[Pesanan Tambahan / Add-on]';
+                $finalNotes = $finalNotes ? $tag.' '.$finalNotes : $tag;
+            }
+
             $order = Order::create([
                 'invoice_number' => $invoiceNumber,
                 'user_id' => null,
@@ -276,7 +292,7 @@ class CustomerOrder extends Component
                 'order_status' => 'pending_confirmation',
                 'paid_amount' => $isGateway ? $this->totalAmount : 0,
                 'change_amount' => 0,
-                'notes' => trim($this->customerNotes) ?: null,
+                'notes' => $finalNotes ?: null,
             ]);
 
             foreach ($this->cart as $item) {

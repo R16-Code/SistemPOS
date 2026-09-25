@@ -275,7 +275,7 @@
                     <select wire:model.live="selectedTableId" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 font-medium focus:outline-none focus:border-amber-700">
                         @foreach($tables as $t)
                             <option value="{{ $t->id }}">
-                                {{ $t->table_number }} (Kapasitas: {{ $t->capacity }} - {{ strtoupper($t->status) }})
+                                {{ $t->table_number }} ({{ $t->status === 'occupied' ? 'TERISI - ' . ($t->currentSessionOrder()?->customer_name ?? 'Aktif') : 'KOSONG' }} &bull; {{ $t->capacity }} org)
                             </option>
                         @endforeach
                     </select>
