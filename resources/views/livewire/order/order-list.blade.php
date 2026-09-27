@@ -299,10 +299,19 @@
             <div class="bg-white text-slate-900 rounded-2xl w-full max-w-sm p-6 shadow-2xl space-y-4 font-mono text-xs border border-slate-200 max-h-[85vh] overflow-y-auto">
                 
                 <div id="thermal-receipt-modal" class="space-y-3">
+                    @php
+                        $receiptLogo = \App\Models\Setting::get('store_logo');
+                        $receiptStoreName = \App\Models\Setting::get('store_name', 'BREWPOS COFFEE');
+                        $receiptAddress = \App\Models\Setting::get('store_address', 'Jl. Mawar No. 123, Jakarta');
+                        $receiptPhone = \App\Models\Setting::get('store_phone', '0812-3456-7890');
+                    @endphp
                     <div class="text-center space-y-1">
-                        <h2 class="font-bold text-base text-black uppercase tracking-wider">BREWPOS COFFEE</h2>
-                        <p class="text-[11px] text-slate-600">Jl. Mawar No. 123, Jakarta</p>
-                        <p class="text-[11px] text-slate-600">Telp: 0812-3456-7890</p>
+                        @if($receiptLogo && \Illuminate\Support\Facades\Storage::disk('public')->exists($receiptLogo))
+                            <img src="{{ asset('storage/' . $receiptLogo) }}" alt="Logo" class="w-12 h-12 mx-auto object-contain mb-1">
+                        @endif
+                        <h2 class="font-bold text-base text-black uppercase tracking-wider">{{ $receiptStoreName }}</h2>
+                        <p class="text-[11px] text-slate-600">{{ $receiptAddress }}</p>
+                        <p class="text-[11px] text-slate-600">Telp: {{ $receiptPhone }}</p>
                         <div class="border-b border-dashed border-slate-400 my-2"></div>
                     </div>
 

@@ -58,21 +58,35 @@
     <!-- Main Printable Sheet -->
     <div class="page-sheet max-w-5xl mx-auto my-8 p-10 bg-white shadow-xl rounded-2xl border border-slate-200 space-y-8">
         
+        @php
+            $storeName = \App\Models\Setting::get('store_name', 'BrewPOS Coffee');
+            $storeTagline = \App\Models\Setting::get('store_tagline', 'Specialty Coffee & Kitchen POS System');
+            $storeAddress = \App\Models\Setting::get('store_address', 'Jl. Mawar No. 123, Jakarta Selatan, DKI Jakarta 12410');
+            $storePhone = \App\Models\Setting::get('store_phone', '0812-3456-7890');
+            $storeEmail = \App\Models\Setting::get('store_email', 'management@brewpos.com');
+            $storeLogo = \App\Models\Setting::get('store_logo');
+        @endphp
         <!-- Header & Kop Dokumen -->
         <div class="border-b-2 border-slate-900 pb-6 flex items-start justify-between gap-6 flex-wrap">
             <div>
                 <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-xl bg-amber-800 text-white flex items-center justify-center font-black text-lg">
-                        B
-                    </div>
+                    @if($storeLogo && \Illuminate\Support\Facades\Storage::disk('public')->exists($storeLogo))
+                        <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 p-0.5 flex items-center justify-center shrink-0 overflow-hidden">
+                            <img src="{{ asset('storage/' . $storeLogo) }}" alt="{{ $storeName }}" class="w-full h-full object-contain">
+                        </div>
+                    @else
+                        <div class="w-9 h-9 rounded-xl bg-amber-800 text-white flex items-center justify-center font-black text-lg">
+                            {{ strtoupper(substr($storeName, 0, 1)) }}
+                        </div>
+                    @endif
                     <div>
-                        <h1 class="text-xl font-black text-slate-950 tracking-tight">BREWPOS COFFEE</h1>
-                        <p class="text-[11px] text-slate-500 font-medium">Specialty Coffee & Kitchen POS System</p>
+                        <h1 class="text-xl font-black text-slate-950 tracking-tight">{{ strtoupper($storeName) }}</h1>
+                        <p class="text-[11px] text-slate-500 font-medium">{{ $storeTagline }}</p>
                     </div>
                 </div>
                 <div class="mt-3 text-xs text-slate-600 leading-relaxed">
-                    <p>Jl. Mawar No. 123, Jakarta Selatan, DKI Jakarta 12410</p>
-                    <p>Telp: 0812-3456-7890 &bull; Email: management@brewpos.com</p>
+                    <p>{{ $storeAddress }}</p>
+                    <p>Telp: {{ $storePhone }} @if($storeEmail) &bull; Email: {{ $storeEmail }} @endif</p>
                 </div>
             </div>
 

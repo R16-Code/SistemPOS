@@ -2,15 +2,26 @@
     <!-- Top Header -->
     <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-slate-200 px-4 py-3 shadow-xs">
         <div class="flex items-center justify-between gap-3 mb-2.5">
-            <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-xl bg-amber-700 flex items-center justify-center text-white shadow-xs shrink-0">
-                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                        <path d="M2,21V19H20V21H2M20,8V5H18V8H20M20,3A2,2 0 0,1 22,5V8A2,2 0 0,1 20,10H18V13A4,4 0 0,1 14,17H8A4,4 0 0,1 4,13V3H20M16,5H6V13A2,2 0 0,0 8,15H14A2,2 0 0,0 16,13V5Z"/>
-                    </svg>
-                </div>
-                <div>
-                    <h1 class="text-base font-bold text-slate-900 leading-tight">BrewPOS Cafe</h1>
-                    <p class="text-xs text-slate-500 font-medium">Self-Order Menu</p>
+            @php
+                $storeName = \App\Models\Setting::get('store_name', 'BrewPOS Cafe');
+                $storeTagline = \App\Models\Setting::get('store_tagline', 'Self-Order Menu');
+                $storeLogo = \App\Models\Setting::get('store_logo');
+            @endphp
+            <div class="flex items-center gap-2.5 min-w-0">
+                @if($storeLogo && \Illuminate\Support\Facades\Storage::disk('public')->exists($storeLogo))
+                    <div class="w-9 h-9 rounded-xl bg-white border border-slate-200/80 p-0.5 flex items-center justify-center shadow-xs shrink-0 overflow-hidden">
+                        <img src="{{ asset('storage/' . $storeLogo) }}" alt="{{ $storeName }}" class="w-full h-full object-contain">
+                    </div>
+                @else
+                    <div class="w-9 h-9 rounded-xl bg-amber-700 flex items-center justify-center text-white shadow-xs shrink-0">
+                        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                            <path d="M2,21V19H20V21H2M20,8V5H18V8H20M20,3A2,2 0 0,1 22,5V8A2,2 0 0,1 20,10H18V13A4,4 0 0,1 14,17H8A4,4 0 0,1 4,13V3H20M16,5H6V13A2,2 0 0,0 8,15H14A2,2 0 0,0 16,13V5Z"/>
+                        </svg>
+                    </div>
+                @endif
+                <div class="min-w-0">
+                    <h1 class="text-base font-bold text-slate-900 leading-tight truncate">{{ $storeName }}</h1>
+                    <p class="text-xs text-slate-500 font-medium truncate">{{ $storeTagline }}</p>
                 </div>
             </div>
 

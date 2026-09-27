@@ -1,14 +1,24 @@
 <div class="w-full max-w-md">
     <div class="bg-white border border-slate-200/90 rounded-3xl p-8 shadow-xl shadow-slate-200/50 space-y-6">
         
+        @php
+            $storeName = \App\Models\Setting::get('store_name', 'BrewPOS Cafe');
+            $storeLogo = \App\Models\Setting::get('store_logo');
+        @endphp
         <!-- Logo & Header -->
         <div class="text-center space-y-2">
-            <div class="inline-flex w-14 h-14 rounded-2xl bg-amber-700 text-white items-center justify-center shadow-lg shadow-amber-700/25 mb-1">
-                <svg class="w-8 h-8 fill-current" viewBox="0 0 24 24">
-                    <path d="M2,21V19H20V21H2M20,8V5H18V8H20M20,3A2,2 0 0,1 22,5V8A2,2 0 0,1 20,10H18V13A4,4 0 0,1 14,17H8A4,4 0 0,1 4,13V3H20M16,5H6V13A2,2 0 0,0 8,15H14A2,2 0 0,0 16,13V5Z"/>
-                </svg>
-            </div>
-            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">BrewPOS Cafe</h1>
+            @if($storeLogo && \Illuminate\Support\Facades\Storage::disk('public')->exists($storeLogo))
+                <div class="inline-flex w-16 h-16 rounded-2xl bg-white border border-slate-200 p-1 items-center justify-center shadow-lg shadow-slate-200/50 mb-1 overflow-hidden">
+                    <img src="{{ asset('storage/' . $storeLogo) }}" alt="{{ $storeName }}" class="w-full h-full object-contain">
+                </div>
+            @else
+                <div class="inline-flex w-14 h-14 rounded-2xl bg-amber-700 text-white items-center justify-center shadow-lg shadow-amber-700/25 mb-1">
+                    <svg class="w-8 h-8 fill-current" viewBox="0 0 24 24">
+                        <path d="M2,21V19H20V21H2M20,8V5H18V8H20M20,3A2,2 0 0,1 22,5V8A2,2 0 0,1 20,10H18V13A4,4 0 0,1 14,17H8A4,4 0 0,1 4,13V3H20M16,5H6V13A2,2 0 0,0 8,15H14A2,2 0 0,0 16,13V5Z"/>
+                    </svg>
+                </div>
+            @endif
+            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">{{ $storeName }}</h1>
             <p class="text-xs text-slate-500">Silakan login untuk membuka kasir dan sistem POS</p>
         </div>
 

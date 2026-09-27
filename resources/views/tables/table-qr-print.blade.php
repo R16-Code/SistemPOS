@@ -38,14 +38,24 @@
 
     <!-- Printable Table Tent Card (Ratio ~ 10cm x 15cm) -->
     <div class="print-card w-80 bg-white rounded-3xl p-6 shadow-xl border border-slate-200 text-center flex flex-col items-center justify-between">
+        @php
+            $storeName = \App\Models\Setting::get('store_name', 'BrewPOS Cafe');
+            $storeLogo = \App\Models\Setting::get('store_logo');
+        @endphp
         <!-- Brand Header -->
         <div class="space-y-1">
-            <div class="w-12 h-12 mx-auto rounded-2xl bg-amber-800 text-white flex items-center justify-center shadow-xs">
-                <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24">
-                    <path d="M2,21V19H20V21H2M20,8V5H18V8H20M20,3A2,2 0 0,1 22,5V8A2,2 0 0,1 20,10H18V13A4,4 0 0,1 14,17H8A4,4 0 0,1 4,13V3H20M16,5H6V13A2,2 0 0,0 8,15H14A2,2 0 0,0 16,13V5Z"/>
-                </svg>
-            </div>
-            <h1 class="text-xl font-black text-slate-900 tracking-tight">BrewPOS Cafe</h1>
+            @if($storeLogo && \Illuminate\Support\Facades\Storage::disk('public')->exists($storeLogo))
+                <div class="w-14 h-14 mx-auto rounded-2xl bg-white border border-slate-200 p-1 flex items-center justify-center shadow-xs overflow-hidden">
+                    <img src="{{ asset('storage/' . $storeLogo) }}" alt="{{ $storeName }}" class="w-full h-full object-contain">
+                </div>
+            @else
+                <div class="w-12 h-12 mx-auto rounded-2xl bg-amber-800 text-white flex items-center justify-center shadow-xs">
+                    <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24">
+                        <path d="M2,21V19H20V21H2M20,8V5H18V8H20M20,3A2,2 0 0,1 22,5V8A2,2 0 0,1 20,10H18V13A4,4 0 0,1 14,17H8A4,4 0 0,1 4,13V3H20M16,5H6V13A2,2 0 0,0 8,15H14A2,2 0 0,0 16,13V5Z"/>
+                    </svg>
+                </div>
+            @endif
+            <h1 class="text-xl font-black text-slate-900 tracking-tight">{{ $storeName }}</h1>
             <p class="text-[11px] font-bold text-amber-800 uppercase tracking-widest">Self-Order Table</p>
         </div>
 

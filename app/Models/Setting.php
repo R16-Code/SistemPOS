@@ -52,11 +52,19 @@ class Setting extends Model
     {
         $fallback = $default ?? (self::DEFAULTS[$key] ?? null);
 
-        return Cache::rememberForever("setting.{$key}", function () use ($key, $fallback) {
-            $record = static::where('key', $key)->first();
+        try {
+            return Cache::rememberForever("setting.{$key}", function () use ($key, $fallback) {
+                try {
+                    $record = static::where('key', $key)->first();
 
-            return $record ? $record->value : $fallback;
-        });
+                    return $record ? $record->value : $fallback;
+                } catch (\Throwable) {
+                    return $fallback;
+                }
+            });
+        } catch (\Throwable) {
+            return $fallback;
+        }
     }
 
     /**

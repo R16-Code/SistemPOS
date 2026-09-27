@@ -43,15 +43,26 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                 </svg>
             </button>
-            <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-lg bg-amber-700 flex items-center justify-center text-white shadow-xs">
-                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                        <path d="M2,21V19H20V21H2M20,8V5H18V8H20M20,3A2,2 0 0,1 22,5V8A2,2 0 0,1 20,10H18V13A4,4 0 0,1 14,17H8A4,4 0 0,1 4,13V3H20M16,5H6V13A2,2 0 0,0 8,15H14A2,2 0 0,0 16,13V5Z"/>
-                    </svg>
-                </div>
-                <div>
-                    <h1 class="font-extrabold text-base text-slate-900 leading-tight">BrewPOS</h1>
-                    <p class="text-[10px] text-amber-700 font-semibold leading-none">Coffee Shop Kasir</p>
+            @php
+                $storeName = \App\Models\Setting::get('store_name', 'BrewPOS');
+                $storeTagline = \App\Models\Setting::get('store_tagline', 'Coffee Shop Kasir');
+                $storeLogo = \App\Models\Setting::get('store_logo');
+            @endphp
+            <div class="flex items-center gap-2.5 min-w-0">
+                @if($storeLogo && \Illuminate\Support\Facades\Storage::disk('public')->exists($storeLogo))
+                    <div class="w-8 h-8 rounded-lg bg-white border border-slate-200/90 p-0.5 flex items-center justify-center shadow-2xs shrink-0 overflow-hidden">
+                        <img src="{{ asset('storage/' . $storeLogo) }}" alt="{{ $storeName }}" class="w-full h-full object-contain">
+                    </div>
+                @else
+                    <div class="w-8 h-8 rounded-lg bg-amber-700 flex items-center justify-center text-white shadow-xs shrink-0">
+                        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                            <path d="M2,21V19H20V21H2M20,8V5H18V8H20M20,3A2,2 0 0,1 22,5V8A2,2 0 0,1 20,10H18V13A4,4 0 0,1 14,17H8A4,4 0 0,1 4,13V3H20M16,5H6V13A2,2 0 0,0 8,15H14A2,2 0 0,0 16,13V5Z"/>
+                        </svg>
+                    </div>
+                @endif
+                <div class="min-w-0">
+                    <h1 class="font-extrabold text-base text-slate-900 leading-tight truncate">{{ $storeName }}</h1>
+                    <p class="text-[10px] text-amber-700 font-semibold leading-none truncate">{{ $storeTagline }}</p>
                 </div>
             </div>
         </div>
@@ -73,23 +84,29 @@
            class="sidebar-drawer fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col justify-between shrink-0 shadow-2xl lg:shadow-sm lg:static lg:transform-none">
         <div>
             <!-- Brand / Logo & Close Button -->
-            <div class="h-16 flex items-center justify-between px-6 border-b border-slate-100">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-amber-700 flex items-center justify-center shadow-sm text-white">
-                        <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
-                            <path d="M2,21V19H20V21H2M20,8V5H18V8H20M20,3A2,2 0 0,1 22,5V8A2,2 0 0,1 20,10H18V13A4,4 0 0,1 14,17H8A4,4 0 0,1 4,13V3H20M16,5H6V13A2,2 0 0,0 8,15H14A2,2 0 0,0 16,13V5Z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h1 class="font-extrabold text-lg text-slate-900 leading-tight tracking-tight">BrewPOS</h1>
-                        <p class="text-xs text-amber-700 font-semibold">Coffee Shop Kasir</p>
+            <div class="h-16 flex items-center justify-between px-5 border-b border-slate-100">
+                <div class="flex items-center gap-3 min-w-0">
+                    @if($storeLogo && \Illuminate\Support\Facades\Storage::disk('public')->exists($storeLogo))
+                        <div class="w-10 h-10 rounded-xl bg-white border border-slate-200/90 p-1 flex items-center justify-center shadow-xs shrink-0 overflow-hidden">
+                            <img src="{{ asset('storage/' . $storeLogo) }}" alt="{{ $storeName }}" class="w-full h-full object-contain">
+                        </div>
+                    @else
+                        <div class="w-10 h-10 rounded-xl bg-amber-700 flex items-center justify-center shadow-sm text-white shrink-0">
+                            <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+                                <path d="M2,21V19H20V21H2M20,8V5H18V8H20M20,3A2,2 0 0,1 22,5V8A2,2 0 0,1 20,10H18V13A4,4 0 0,1 14,17H8A4,4 0 0,1 4,13V3H20M16,5H6V13A2,2 0 0,0 8,15H14A2,2 0 0,0 16,13V5Z"/>
+                            </svg>
+                        </div>
+                    @endif
+                    <div class="min-w-0">
+                        <h1 class="font-extrabold text-base text-slate-900 leading-tight tracking-tight truncate">{{ $storeName }}</h1>
+                        <p class="text-xs text-amber-700 font-semibold truncate">{{ $storeTagline }}</p>
                     </div>
                 </div>
 
                 <!-- Close button for drawer (visible on < lg) -->
                 <button type="button" 
                         @click="mobileSidebarOpen = false" 
-                        class="min-h-11 min-w-11 flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-700 active:scale-95 transition-all lg:hidden cursor-pointer">
+                        class="min-h-11 min-w-11 flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-700 active:scale-95 transition-all lg:hidden cursor-pointer shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
