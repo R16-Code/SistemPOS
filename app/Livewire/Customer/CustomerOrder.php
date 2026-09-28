@@ -10,7 +10,9 @@ use App\Models\ProductVariant;
 use App\Models\Setting;
 use App\Models\Table;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -153,6 +155,7 @@ class CustomerOrder extends Component
                 'product_id' => $product->id,
                 'name' => $product->name,
                 'price' => $finalPrice,
+                'variant_ids' => $variantIds,
                 'quantity' => 1,
                 'notes' => $notes,
                 'subtotal' => $finalPrice,
@@ -252,19 +255,85 @@ class CustomerOrder extends Component
             return;
         }
 
-        DB::beginTransaction();
+        // 1. Anti double-submit / spam order via Atomic Lock
+        $lockKey = "order_submit_table_{$this->table->id}";
+        $lock = Cache::lock($lockKey, 5);
+
+        if (! $lock->get()) {
+            $this->addError('cart', 'Pesanan Anda sedang diproses. Mohon tunggu...');
+
+            return;
+        }
+
         try {
+            DB::beginTransaction();
+
+            // 2. Consolidate required quantity per product_id to prevent multi-variant race conditions
+            $productQuantities = [];
             foreach ($this->cart as $item) {
-                $currentProduct = Product::where('id', $item['product_id'])->lockForUpdate()->first();
-                if (! $currentProduct || ! $currentProduct->is_available || $currentProduct->stock < $item['quantity']) {
+                $pid = (int) $item['product_id'];
+                $qty = max(1, (int) $item['quantity']);
+                $productQuantities[$pid] = ($productQuantities[$pid] ?? 0) + $qty;
+            }
+
+            // 3. Pessimistic Locking on all required products
+            $lockedProducts = [];
+            foreach ($productQuantities as $productId => $totalRequiredQty) {
+                $product = Product::where('id', $productId)->lockForUpdate()->first();
+                if (! $product || ! $product->is_available || $product->stock < $totalRequiredQty) {
                     DB::rollBack();
-                    $this->addError('cart', 'Stok untuk menu "'.$item['name'].'" tidak mencukupi.');
+                    $productName = $product ? $product->name : 'Menu';
+                    $availableStock = $product ? max(0, $product->stock) : 0;
+                    $this->addError('cart', "Stok untuk menu '{$productName}' tidak mencukupi (tersisa {$availableStock}).");
 
                     return;
                 }
+                $lockedProducts[$productId] = $product;
             }
 
-            $invoiceNumber = 'TRX-'.date('Ymd').'-'.str_pad(Order::whereDate('created_at', now())->count() + 1, 4, '0', STR_PAD_LEFT);
+            // 4. Strict Price Tampering Prevention: Recalculate all totals from master DB
+            $validatedItems = [];
+            $serverSubtotal = 0;
+
+            foreach ($this->cart as $item) {
+                $productId = (int) $item['product_id'];
+                $qty = max(1, (int) $item['quantity']);
+                $lockedProduct = $lockedProducts[$productId];
+
+                $unitPrice = (float) $lockedProduct->price;
+
+                $variantIds = $item['variant_ids'] ?? [];
+                if (! empty($variantIds)) {
+                    $extraTotal = (float) ProductVariant::where('product_id', $productId)
+                        ->whereIn('id', $variantIds)
+                        ->sum('extra_price');
+                    $unitPrice += $extraTotal;
+                }
+
+                $lineSubtotal = $unitPrice * $qty;
+                $serverSubtotal += $lineSubtotal;
+
+                $validatedItems[] = [
+                    'product_id' => $productId,
+                    'product_name' => $lockedProduct->name,
+                    'unit_price' => $unitPrice,
+                    'quantity' => $qty,
+                    'subtotal' => $lineSubtotal,
+                    'notes' => $item['notes'] ?? '',
+                ];
+            }
+
+            // Calculate tax dynamically from verified settings
+            $taxEnabled = (bool) ((int) Setting::get('tax_enabled', '1'));
+            $taxPercentage = (float) Setting::get('tax_percentage', 11);
+            $taxRate = $taxEnabled ? ($taxPercentage / 100) : 0;
+            $serverTaxAmount = round($serverSubtotal * $taxRate);
+            $serverTotalAmount = $serverSubtotal + $serverTaxAmount;
+
+            // Collision-resistant unique invoice number
+            $seq = Order::whereDate('created_at', now())->count() + 1;
+            $randomSuffix = strtoupper(Str::random(3));
+            $invoiceNumber = 'TRX-'.date('Ymd').'-'.$randomSuffix.'-'.str_pad($seq, 4, '0', STR_PAD_LEFT);
 
             $isGateway = $this->paymentChoice === 'gateway';
 
@@ -283,30 +352,33 @@ class CustomerOrder extends Component
                 'customer_phone' => trim($this->customerPhone) ?: null,
                 'order_source' => 'qr_table',
                 'order_type' => 'dine_in',
-                'subtotal' => $this->subtotal,
-                'tax_amount' => $this->taxAmount,
+                'subtotal' => $serverSubtotal,
+                'tax_amount' => $serverTaxAmount,
                 'discount_amount' => 0,
-                'total_amount' => $this->totalAmount,
+                'total_amount' => $serverTotalAmount,
                 'payment_method' => $isGateway ? 'qris' : 'unpaid',
                 'payment_status' => $isGateway ? 'paid' : 'pending',
                 'order_status' => 'pending_confirmation',
-                'paid_amount' => $isGateway ? $this->totalAmount : 0,
+                'paid_amount' => $isGateway ? $serverTotalAmount : 0,
                 'change_amount' => 0,
                 'notes' => $finalNotes ?: null,
             ]);
 
-            foreach ($this->cart as $item) {
+            foreach ($validatedItems as $valItem) {
                 OrderItem::create([
                     'order_id' => $order->id,
-                    'product_id' => $item['product_id'],
-                    'product_name' => $item['name'],
-                    'unit_price' => $item['price'],
-                    'quantity' => $item['quantity'],
-                    'subtotal' => $item['subtotal'],
-                    'notes' => $item['notes'],
+                    'product_id' => $valItem['product_id'],
+                    'product_name' => $valItem['product_name'],
+                    'unit_price' => $valItem['unit_price'],
+                    'quantity' => $valItem['quantity'],
+                    'subtotal' => $valItem['subtotal'],
+                    'notes' => $valItem['notes'],
                 ]);
+            }
 
-                Product::where('id', $item['product_id'])->decrement('stock', $item['quantity']);
+            // Deduct stock safely from locked product rows
+            foreach ($productQuantities as $productId => $totalQty) {
+                $lockedProducts[$productId]->decrement('stock', $totalQty);
             }
 
             $this->table->update(['status' => 'occupied']);
@@ -320,6 +392,8 @@ class CustomerOrder extends Component
         } catch (\Throwable $e) {
             DB::rollBack();
             $this->addError('cart', 'Gagal membuat pesanan: '.$e->getMessage());
+        } finally {
+            $lock->release();
         }
     }
 

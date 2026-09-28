@@ -558,8 +558,17 @@
                 <!-- Process Button -->
                 <div class="pt-3 border-t border-slate-100 shrink-0">
                     <button wire:click="processPayment" 
-                            class="w-full min-h-12 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-sm shadow-md shadow-amber-700/20 transition-all flex items-center justify-center">
-                        Selesaikan Transaksi & Cetak Struk
+                            wire:loading.attr="disabled"
+                            wire:target="processPayment"
+                            class="w-full min-h-12 rounded-xl bg-amber-700 hover:bg-amber-800 disabled:opacity-50 text-white font-bold text-sm shadow-md shadow-amber-700/20 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                        <span wire:loading.remove wire:target="processPayment">Selesaikan Transaksi & Cetak Struk</span>
+                        <span wire:loading wire:target="processPayment" class="flex items-center gap-2">
+                            <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Memproses Transaksi...</span>
+                        </span>
                     </button>
                 </div>
             </div>
@@ -881,11 +890,20 @@
 
                                     <button type="button"
                                             wire:click="confirmIncomingOrder({{ $currentOrder->id }})"
-                                            class="flex-1 min-h-11 rounded-xl bg-amber-800 hover:bg-amber-900 active:scale-98 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-all">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            wire:loading.attr="disabled"
+                                            wire:target="confirmIncomingOrder({{ $currentOrder->id }})"
+                                            class="flex-1 min-h-11 rounded-xl bg-amber-800 hover:bg-amber-900 active:scale-98 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer">
+                                        <svg wire:loading.remove wire:target="confirmIncomingOrder({{ $currentOrder->id }})" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                         </svg>
-                                        <span>Konfirmasi & Teruskan ke Dapur</span>
+                                        <span wire:loading.remove wire:target="confirmIncomingOrder({{ $currentOrder->id }})">Konfirmasi & Teruskan ke Dapur</span>
+                                        <span wire:loading wire:target="confirmIncomingOrder({{ $currentOrder->id }})" class="flex items-center gap-2">
+                                            <svg class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            <span>Mengonfirmasi...</span>
+                                        </span>
                                     </button>
                                 </div>
                             </div>
