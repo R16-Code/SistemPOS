@@ -17,7 +17,21 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
     </style>
 </head>
-<body x-data="{ mobileSidebarOpen: false }" class="h-full font-sans antialiased bg-slate-100 text-slate-800 flex flex-col lg:flex-row overflow-hidden">
+<body x-data="{ mobileSidebarOpen: false, isOnline: navigator.onLine }" 
+      @online.window="isOnline = true" 
+      @offline.window="isOnline = false" 
+      class="h-full font-sans antialiased bg-slate-100 text-slate-800 flex flex-col lg:flex-row overflow-hidden relative">
+
+    <!-- Global Offline Banner -->
+    <div x-show="!isOnline" 
+         x-cloak 
+         class="fixed top-0 inset-x-0 z-50 bg-rose-600 text-white text-xs font-bold px-4 py-2 text-center flex items-center justify-center gap-2 shadow-lg animate-in slide-in-from-top duration-200">
+        <svg class="w-4 h-4 animate-spin text-rose-200 shrink-0" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span>Koneksi Terputus (Offline) — Sistem akan otomatis menyambungkan kembali saat internet pulih tanpa perlu refresh.</span>
+    </div>
 
     <!-- Mobile & Tablet Backdrop Overlay -->
     <div x-show="mobileSidebarOpen" 
@@ -72,6 +86,13 @@
             $userInitials = $authUser ? strtoupper(substr($authUser->name, 0, 2)) : 'US';
         @endphp
         <div class="flex items-center gap-2">
+            <!-- Real-time Status Indicator (Mobile) -->
+            <div class="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-bold border transition-colors"
+                 :class="isOnline ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'">
+                <span class="w-1.5 h-1.5 rounded-full shrink-0" :class="isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'"></span>
+                <span x-text="isOnline ? 'Live' : 'Offline'"></span>
+            </div>
+
             <span class="text-xs font-semibold text-slate-600 hidden sm:inline">{{ $authUser->name ?? 'User' }}</span>
             <div class="w-9 h-9 rounded-full bg-amber-100 text-amber-900 border border-amber-200 flex items-center justify-center font-bold text-xs shadow-2xs">
                 {{ $userInitials }}
@@ -182,7 +203,18 @@
         </div>
 
         <!-- User Shift Info & Logout -->
-        <div class="p-4 border-t border-slate-100">
+        <div class="p-4 border-t border-slate-100 space-y-2.5">
+            <!-- Connection Indicator (Desktop Sidebar) -->
+            <div class="flex items-center justify-between px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all"
+                 :class="isOnline ? 'bg-emerald-50/80 text-emerald-800 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200 animate-pulse'">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full shrink-0" :class="isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'"></span>
+                    <span x-text="isOnline ? 'Real-time Terhubung' : 'Koneksi Terputus'"></span>
+                </div>
+                <span class="text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded"
+                      :class="isOnline ? 'bg-emerald-200/60 text-emerald-900' : 'bg-rose-200 text-rose-900'"
+                      x-text="isOnline ? 'ONLINE' : 'OFFLINE'"></span>
+            </div>
             @php
                 $authUser = auth()->user();
                 $userInitials = $authUser ? strtoupper(substr($authUser->name, 0, 2)) : 'US';

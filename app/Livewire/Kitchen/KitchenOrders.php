@@ -3,6 +3,7 @@
 namespace App\Livewire\Kitchen;
 
 use App\Models\Order;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -12,6 +13,12 @@ class KitchenOrders extends Component
     public string $activeTab = 'all_active'; // all_active, pending, cooking, ready, served, completed
 
     public string $search = '';
+
+    #[On('refresh-realtime')]
+    public function handleRealtimeReconnect(): void
+    {
+        // Component state re-renders automatically
+    }
 
     public function setTab(string $tab): void
     {

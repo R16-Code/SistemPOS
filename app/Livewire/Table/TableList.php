@@ -154,7 +154,7 @@ class TableList extends Component
 
     public function render()
     {
-        $tables = Table::with(['activeOrders.items'])->get();
+        $tables = Table::with(['currentSessionOrderRelation', 'activeOrders.items'])->get();
 
         return view('livewire.table.table-list', [
             'tables' => $tables,

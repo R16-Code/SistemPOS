@@ -4,6 +4,7 @@ namespace App\Livewire\Product;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\ImageOptimizer;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -241,7 +242,7 @@ class ProductList extends Component
             if ($this->existingImage && Storage::disk('public')->exists($this->existingImage)) {
                 Storage::disk('public')->delete($this->existingImage);
             }
-            $imagePath = $this->image->store('products', 'public');
+            $imagePath = ImageOptimizer::optimizeAndStore($this->image, 'products', 800);
         } elseif ($this->removeImage) {
             if ($this->existingImage && Storage::disk('public')->exists($this->existingImage)) {
                 Storage::disk('public')->delete($this->existingImage);

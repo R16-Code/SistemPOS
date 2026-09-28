@@ -3,6 +3,7 @@
 namespace App\Livewire\Setting;
 
 use App\Models\Setting;
+use App\Services\ImageOptimizer;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -109,7 +110,7 @@ class SettingIndex extends Component
             if ($this->existing_store_logo && Storage::disk('public')->exists($this->existing_store_logo)) {
                 Storage::disk('public')->delete($this->existing_store_logo);
             }
-            $this->existing_store_logo = $this->store_logo->store('settings', 'public');
+            $this->existing_store_logo = ImageOptimizer::optimizeAndStore($this->store_logo, 'settings', 600);
             Setting::set('store_logo', $this->existing_store_logo, 'store');
             $this->store_logo = null;
         }
@@ -182,7 +183,7 @@ class SettingIndex extends Component
             if ($this->existing_qris_image && Storage::disk('public')->exists($this->existing_qris_image)) {
                 Storage::disk('public')->delete($this->existing_qris_image);
             }
-            $this->existing_qris_image = $this->qris_image->store('settings', 'public');
+            $this->existing_qris_image = ImageOptimizer::optimizeAndStore($this->qris_image, 'settings', 800);
             Setting::set('qris_image', $this->existing_qris_image, 'payment');
             $this->qris_image = null;
         }
