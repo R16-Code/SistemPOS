@@ -200,8 +200,8 @@ tests/Feature/
 1. Clone repositori dan masuk ke direktori proyek:
 
 ```bash
-git clone https://github.com/R16-Code/MinPro-SistemPOS.git
-cd MinPro-SistemPOS
+git clone https://github.com/R16-Code/SistemPOS.git
+cd SistemPOS
 ```
 
 2. Install dependensi PHP dan JavaScript:
