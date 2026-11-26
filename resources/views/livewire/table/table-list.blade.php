@@ -222,7 +222,23 @@
                                value="{{ $selectedQrTable->qr_url }}"
                                class="w-full text-xs bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 font-mono select-all focus:outline-none">
                         <button type="button"
-                                @click="navigator.clipboard.writeText('{{ $selectedQrTable->qr_url }}'); copied = true; setTimeout(() => copied = false, 2000)"
+                                @click="
+                                    const url = @js($selectedQrTable->qr_url);
+                                    if (navigator.clipboard && window.isSecureContext) {
+                                        navigator.clipboard.writeText(url);
+                                    } else {
+                                        const ta = document.createElement('textarea');
+                                        ta.value = url;
+                                        ta.style.position = 'fixed';
+                                        ta.style.opacity = '0';
+                                        document.body.appendChild(ta);
+                                        ta.select();
+                                        document.execCommand('copy');
+                                        document.body.removeChild(ta);
+                                    }
+                                    copied = true;
+                                    setTimeout(() => copied = false, 2000);
+                                "
                                 class="min-h-9 px-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold shrink-0 transition-colors">
                             <span x-show="!copied">Salin</span>
                             <span x-show="copied" class="text-emerald-300">Tersalin!</span>

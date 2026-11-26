@@ -880,6 +880,11 @@
                                 @endif
 
                                 <!-- Actions -->
+                                @error('incoming')
+                                    <div class="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
                                 <div class="pt-2 flex items-center gap-3">
                                     <button type="button"
                                             wire:click="rejectIncomingOrder({{ $currentOrder->id }})"

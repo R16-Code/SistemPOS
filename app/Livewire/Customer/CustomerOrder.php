@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -94,6 +95,11 @@ class CustomerOrder extends Component
         $this->pushToCart($product, [], 0, '');
     }
 
+    public function selectVariant(string $groupName, int $variantId): void
+    {
+        $this->selectedVariants[$groupName] = $variantId;
+    }
+
     public function confirmVariantSelection(): void
     {
         if (! $this->selectedProduct) {
@@ -159,7 +165,7 @@ class CustomerOrder extends Component
                 'quantity' => 1,
                 'notes' => $notes,
                 'subtotal' => $finalPrice,
-                'image_path' => $product->image_path,
+                'image_path' => $product->image ?? $product->image_path,
             ];
         }
     }
@@ -175,16 +181,25 @@ class CustomerOrder extends Component
                 $this->cart[$key]['subtotal'] = $newQty * $this->cart[$key]['price'];
             }
         }
+
+        if (empty($this->cart)) {
+            $this->showCartModal = false;
+        }
     }
 
     public function removeFromCart(string $key): void
     {
         unset($this->cart[$key]);
+
+        if (empty($this->cart)) {
+            $this->showCartModal = false;
+        }
     }
 
     public function clearCart(): void
     {
         $this->cart = [];
+        $this->showCartModal = false;
     }
 
     public function getSubtotalProperty(): float
@@ -194,7 +209,7 @@ class CustomerOrder extends Component
 
     public function getTaxAmountProperty(): float
     {
-        return $this->subtotal * $this->taxRate;
+        return round($this->subtotal * $this->taxRate);
     }
 
     public function getTotalAmountProperty(): float
@@ -229,6 +244,7 @@ class CustomerOrder extends Component
     public function openCart(): void
     {
         if (! empty($this->cart)) {
+            $this->resetValidation();
             $this->showCartModal = true;
         }
     }
@@ -240,27 +256,59 @@ class CustomerOrder extends Component
 
     public function submitOrder()
     {
-        $this->validate([
-            'customerName' => 'required|string|min:2|max:50',
-            'customerPhone' => 'nullable|string|max:20',
-            'paymentChoice' => 'required|in:cashier,gateway',
-        ], [
-            'customerName.required' => 'Mohon masukkan nama pemesan.',
-            'customerName.min' => 'Nama minimal 2 karakter.',
-        ]);
+        $this->customerName = trim($this->customerName);
+        $this->customerPhone = trim($this->customerPhone);
+
+        try {
+            $this->validate([
+                'customerName' => 'required|string|min:2|max:50',
+                'customerPhone' => 'nullable|string|max:20',
+                'paymentChoice' => 'required|in:cashier,gateway',
+            ], [
+                'customerName.required' => 'Mohon masukkan nama pemesan.',
+                'customerName.min' => 'Nama minimal 2 karakter.',
+                'customerName.max' => 'Nama maksimal 50 karakter.',
+                'customerPhone.max' => 'Nomor WhatsApp / HP maksimal 20 karakter.',
+                'paymentChoice.required' => 'Mohon pilih metode pembayaran.',
+                'paymentChoice.in' => 'Metode pembayaran yang dipilih tidak valid.',
+            ]);
+        } catch (ValidationException $e) {
+            $this->dispatch('checkout-error');
+            throw $e;
+        }
+
+        $freshTable = $this->table->fresh();
+        if (! $freshTable || ! $freshTable->is_active) {
+            $this->addError('cart', 'Pemesanan mandiri untuk meja ini sedang dinonaktifkan.');
+            $this->dispatch('checkout-error');
+
+            return;
+        }
 
         if (empty($this->cart)) {
             $this->addError('cart', 'Keranjang pesanan masih kosong.');
+            $this->dispatch('checkout-error');
 
             return;
         }
 
         // 1. Anti double-submit / spam order via Atomic Lock
         $lockKey = "order_submit_table_{$this->table->id}";
-        $lock = Cache::lock($lockKey, 5);
+        $lock = null;
+        $lockAcquired = false;
 
-        if (! $lock->get()) {
+        try {
+            $lock = Cache::lock($lockKey, 5);
+            $lockAcquired = $lock->get();
+        } catch (\Throwable) {
+            // Fallback gracefully if cache lock store is temporarily unavailable
+            $lockAcquired = true;
+            $lock = null;
+        }
+
+        if (! $lockAcquired) {
             $this->addError('cart', 'Pesanan Anda sedang diproses. Mohon tunggu...');
+            $this->dispatch('checkout-error');
 
             return;
         }
@@ -285,6 +333,7 @@ class CustomerOrder extends Component
                     $productName = $product ? $product->name : 'Menu';
                     $availableStock = $product ? max(0, $product->stock) : 0;
                     $this->addError('cart', "Stok untuk menu '{$productName}' tidak mencukupi (tersisa {$availableStock}).");
+                    $this->dispatch('checkout-error');
 
                     return;
                 }
@@ -348,8 +397,8 @@ class CustomerOrder extends Component
                 'invoice_number' => $invoiceNumber,
                 'user_id' => null,
                 'table_id' => $this->table->id,
-                'customer_name' => trim($this->customerName),
-                'customer_phone' => trim($this->customerPhone) ?: null,
+                'customer_name' => $this->customerName,
+                'customer_phone' => $this->customerPhone ?: null,
                 'order_source' => 'qr_table',
                 'order_type' => 'dine_in',
                 'subtotal' => $serverSubtotal,
@@ -385,15 +434,24 @@ class CustomerOrder extends Component
 
             DB::commit();
 
-            return redirect()->route('customer.order.status', [
+            return $this->redirectRoute('customer.order.status', [
                 'token' => $this->token,
                 'invoice' => $order->invoice_number,
             ]);
         } catch (\Throwable $e) {
-            DB::rollBack();
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
             $this->addError('cart', 'Gagal membuat pesanan: '.$e->getMessage());
+            $this->dispatch('checkout-error');
         } finally {
-            $lock->release();
+            if ($lock) {
+                try {
+                    $lock->release();
+                } catch (\Throwable) {
+                    // Ignore release failures when lock already expired
+                }
+            }
         }
     }
 

@@ -241,10 +241,12 @@
                 <span>Subtotal</span>
                 <span>Rp {{ number_format($order->subtotal, 0, ',', '.') }}</span>
             </div>
-            <div class="flex justify-between text-slate-500">
-                <span>PPN (11%)</span>
-                <span>Rp {{ number_format($order->tax_amount, 0, ',', '.') }}</span>
-            </div>
+            @if($order->tax_amount > 0)
+                <div class="flex justify-between text-slate-500">
+                    <span>{{ \App\Models\Setting::get('tax_name', 'PPN') }}</span>
+                    <span>Rp {{ number_format($order->tax_amount, 0, ',', '.') }}</span>
+                </div>
+            @endif
             <div class="pt-2 border-t border-slate-100 flex justify-between text-sm font-black text-slate-900">
                 <span>Total Tagihan</span>
                 <span class="text-amber-900 font-extrabold">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</span>

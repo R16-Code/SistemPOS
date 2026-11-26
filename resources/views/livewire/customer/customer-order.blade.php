@@ -77,6 +77,7 @@
         </button>
         @foreach($categories as $cat)
             <button type="button"
+                    wire:key="cat-{{ $cat->id }}"
                     wire:click="selectCategory({{ $cat->id }})"
                     class="min-h-11 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 {{ $selectedCategory === $cat->id ? 'bg-amber-800 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100' }}">
                 {{ $cat->name }}
@@ -110,7 +111,7 @@
 
     <!-- Active Orders Alert Banner (if any active order on this table) -->
     @if($this->activeOrders->isNotEmpty())
-        <div wire:poll.5s class="px-4 pt-3 space-y-2.5">
+        <div @if(! $showCartModal && ! $showVariantModal) wire:poll.5s @endif class="px-4 pt-3 space-y-2.5">
             @foreach($this->activeOrders as $activeOrder)
                 @php
                     $statusConfig = [
@@ -146,7 +147,7 @@
                         'dot' => 'bg-white',
                     ];
                 @endphp
-                <div class="bg-linear-to-br from-slate-900 via-amber-950 to-slate-900 text-white rounded-2xl p-3.5 shadow-md border border-amber-800/40 relative overflow-hidden">
+                <div wire:key="active-order-{{ $activeOrder->id }}" class="bg-linear-to-br from-slate-900 via-amber-950 to-slate-900 text-white rounded-2xl p-3.5 shadow-md border border-amber-800/40 relative overflow-hidden">
                     <div class="flex items-center justify-between gap-3 relative z-10">
                         <div class="flex items-center gap-3 min-w-0">
                             <div class="w-10 h-10 rounded-xl bg-amber-800/70 border border-amber-600/40 flex items-center justify-center shrink-0 shadow-inner text-amber-300">
@@ -194,7 +195,7 @@
         <!-- Products Grid / List -->
         <main class="p-4 space-y-3">
             @forelse($products as $product)
-                <div class="bg-white rounded-2xl p-3.5 border border-slate-200/90 shadow-xs flex items-center justify-between gap-3 transition-all hover:border-amber-300">
+                <div wire:key="product-{{ $product->id }}" class="bg-white rounded-2xl p-3.5 border border-slate-200/90 shadow-xs flex items-center justify-between gap-3 transition-all hover:border-amber-300">
                     <div class="flex items-center gap-3 min-w-0">
                         <!-- Product Thumbnail -->
                         <div class="w-16 h-16 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center relative aspect-square">
@@ -297,9 +298,9 @@
     <!-- Modal: Variant Customization (Bottom Sheet) -->
     @if($showVariantModal && $selectedProduct)
         <div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/60 backdrop-blur-xs p-0 sm:p-4">
-            <div class="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 flex flex-col max-h-[90vh] overflow-hidden animate-in slide-in-from-bottom duration-200">
+            <div class="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 flex flex-col max-h-[90dvh] overflow-hidden">
                 <!-- Modal Header -->
-                <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+                <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
                     <div>
                         <h3 class="font-bold text-base text-slate-900">{{ $selectedProduct->name }}</h3>
                         <p class="text-xs text-amber-900 font-extrabold mt-0.5">
@@ -314,20 +315,21 @@
                 </div>
 
                 <!-- Modal Body (Scrollable) -->
-                <div class="p-5 overflow-y-auto space-y-4">
+                <div class="p-5 flex-1 min-h-0 overflow-y-auto space-y-4">
                     @php
                         $variantGroups = $selectedProduct->variants->groupBy('variant_group');
                     @endphp
 
                     @foreach($variantGroups as $groupName => $variants)
-                        <div>
+                        <div wire:key="variant-group-{{ md5($groupName) }}">
                             <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
                                 {{ $groupName }}
                             </label>
                             <div class="grid grid-cols-2 gap-2">
                                 @foreach($variants as $variant)
                                     <button type="button"
-                                            wire:click="$set('selectedVariants.{{ $groupName }}', {{ $variant->id }})"
+                                            wire:key="variant-{{ $variant->id }}"
+                                            wire:click="selectVariant({{ \Illuminate\Support\Js::from($groupName) }}, {{ $variant->id }})"
                                             class="min-h-11 px-3 py-2 rounded-xl text-xs font-medium border text-left flex flex-col justify-center transition-all {{ ($selectedVariants[$groupName] ?? null) == $variant->id ? 'bg-amber-50 border-amber-600 text-amber-950 font-bold ring-1 ring-amber-600' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50' }}">
                                         <span>{{ $variant->name }}</span>
                                         @if($variant->extra_price > 0)
@@ -352,7 +354,7 @@
                 </div>
 
                 <!-- Modal Footer -->
-                <div class="p-4 border-t border-slate-100 bg-slate-50 flex items-center gap-3">
+                <div class="p-4 border-t border-slate-100 bg-slate-50 flex items-center gap-3 shrink-0">
                     <button type="button"
                             wire:click="closeVariantModal"
                             class="min-h-12 px-4 rounded-xl border border-slate-300 bg-white text-slate-700 font-semibold text-xs hover:bg-slate-100 transition-colors">
@@ -360,7 +362,9 @@
                     </button>
                     <button type="button"
                             wire:click="confirmVariantSelection"
-                            class="flex-1 min-h-12 rounded-xl bg-amber-800 hover:bg-amber-900 active:scale-98 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all">
+                            wire:loading.attr="disabled"
+                            wire:target="confirmVariantSelection"
+                            class="flex-1 min-h-12 rounded-xl bg-amber-800 hover:bg-amber-900 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all disabled:opacity-50">
                         <span>Tambahkan ke Pesanan</span>
                         <span>(Rp {{ number_format($this->variantModalPrice, 0, ',', '.') }})</span>
                     </button>
@@ -371,10 +375,28 @@
 
     <!-- Modal: Cart & Checkout (Slide Over / Full Modal) -->
     @if($showCartModal)
-        <div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/60 backdrop-blur-xs p-0 sm:p-4">
-            <div class="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 flex flex-col max-h-[92vh] overflow-hidden animate-in slide-in-from-bottom duration-200">
+        <div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/60 backdrop-blur-xs p-0 sm:p-4"
+             x-data="{
+                 scrollToError() {
+                     this.$nextTick(() => {
+                         const body = this.$refs.cartModalBody;
+                         if (!body) return;
+                         const firstInvalid = body.querySelector('[data-checkout-error]');
+                         if (firstInvalid) {
+                             firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                             const input = firstInvalid.querySelector('input, textarea');
+                             if (input) input.focus();
+                         } else {
+                             body.scrollTo({ top: 0, behavior: 'smooth' });
+                         }
+                     });
+                 }
+             }"
+             @checkout-error.window="scrollToError()">
+            <form wire:submit="submitOrder"
+                  class="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 flex flex-col max-h-[92dvh] overflow-hidden">
                 <!-- Cart Header -->
-                <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
+                <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/80 shrink-0">
                     <div>
                         <h3 class="font-extrabold text-base text-slate-900">Konfirmasi Pesanan</h3>
                         <p class="text-xs text-slate-500 font-medium">Meja: <span class="font-bold text-amber-800">{{ $table->table_number }}</span></p>
@@ -387,9 +409,9 @@
                 </div>
 
                 <!-- Cart Body -->
-                <div class="p-5 overflow-y-auto space-y-4">
+                <div x-ref="cartModalBody" class="p-5 flex-1 min-h-0 overflow-y-auto space-y-4">
                     @if($errors->has('cart'))
-                        <div class="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">
+                        <div data-checkout-error class="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">
                             {{ $errors->first('cart') }}
                         </div>
                     @endif
@@ -400,7 +422,7 @@
                             Daftar Menu ({{ count($cart) }})
                         </label>
                         @foreach($cart as $key => $item)
-                            <div class="bg-slate-50 rounded-2xl p-3 border border-slate-200/80 flex items-center justify-between gap-3">
+                            <div wire:key="cart-item-{{ $key }}" class="bg-slate-50 rounded-2xl p-3 border border-slate-200/80 flex items-center justify-between gap-3">
                                 <div class="min-w-0 flex-1">
                                     <h4 class="text-xs font-bold text-slate-900 truncate">{{ $item['name'] }}</h4>
                                     @if(!empty($item['notes']))
@@ -444,7 +466,7 @@
                             </div>
                         @endif
 
-                        <div>
+                        <div @error('customerName') data-checkout-error @enderror>
                             <label class="block text-xs font-medium text-slate-600 mb-1">
                                 Nama Lengkap / Panggilan <span class="text-red-500">*</span>
                             </label>
@@ -453,22 +475,26 @@
                                    autocomplete="name"
                                    autocorrect="off"
                                    placeholder="Masukkan nama Anda..."
-                                   class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600">
+                                   class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-slate-50 border text-slate-900 focus:bg-white focus:outline-none focus:ring-2 {{ $errors->has('customerName') ? 'border-red-400 ring-1 ring-red-400 focus:ring-red-500' : 'border-slate-200 focus:ring-amber-600' }}">
                             @error('customerName')
-                                <span class="text-[11px] text-red-600 font-medium mt-1 block">{{ $message }}</span>
+                                <span class="text-[11px] text-red-600 font-semibold mt-1 block">{{ $message }}</span>
                             @enderror
                         </div>
 
-                        <div>
+                        <div @error('customerPhone') data-checkout-error @enderror>
                             <label class="block text-xs font-medium text-slate-600 mb-1">
                                 No. WhatsApp / HP (Opsional)
                             </label>
                             <input type="tel"
                                    inputmode="numeric"
                                    autocomplete="tel"
+                                   maxlength="20"
                                    wire:model="customerPhone"
                                    placeholder="Contoh: 08123456789"
-                                   class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600">
+                                   class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-slate-50 border text-slate-900 focus:bg-white focus:outline-none focus:ring-2 {{ $errors->has('customerPhone') ? 'border-red-400 ring-1 ring-red-400 focus:ring-red-500' : 'border-slate-200 focus:ring-amber-600' }}">
+                            @error('customerPhone')
+                                <span class="text-[11px] text-red-600 font-semibold mt-1 block">{{ $message }}</span>
+                            @enderror
                         </div>
 
                         <div>
@@ -483,7 +509,7 @@
                     </div>
 
                     <!-- Payment Option Selection -->
-                    <div class="space-y-2 pt-2 border-t border-slate-200">
+                    <div class="space-y-2 pt-2 border-t border-slate-200" @error('paymentChoice') data-checkout-error @enderror>
                         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
                             Pilihan Pembayaran
                         </label>
@@ -510,6 +536,10 @@
                                 </div>
                             </label>
                         </div>
+
+                        @error('paymentChoice')
+                            <span class="text-[11px] text-red-600 font-semibold mt-1 block">{{ $message }}</span>
+                        @enderror
                     </div>
 
                     <!-- Financial Summary -->
@@ -532,27 +562,38 @@
                 </div>
 
                 <!-- Cart Footer Submit -->
-                <div class="p-4 border-t border-slate-200 bg-white flex items-center gap-3">
-                    <button type="button"
-                            wire:click="closeCart"
-                            class="min-h-12 px-4 rounded-xl border border-slate-300 text-slate-700 font-semibold text-xs hover:bg-slate-100 transition-colors">
-                        Kembali
-                    </button>
-                    <button type="button"
-                            wire:click="submitOrder"
-                            wire:loading.attr="disabled"
-                            class="flex-1 min-h-12 rounded-xl bg-amber-800 hover:bg-amber-900 active:scale-98 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all disabled:opacity-50">
-                        <span wire:loading.remove>Kirim Pesanan Sekarang</span>
-                        <span wire:loading class="flex items-center gap-2">
-                            <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <div class="p-4 border-t border-slate-200 bg-white space-y-2.5 shrink-0">
+                    @if($errors->any())
+                        <div class="px-3 py-2 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2">
+                            <svg class="w-4 h-4 shrink-0 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
-                            <span>Memproses...</span>
-                        </span>
-                    </button>
+                            <span>{{ $errors->first() }}</span>
+                        </div>
+                    @endif
+
+                    <div class="flex items-center gap-3">
+                        <button type="button"
+                                wire:click="closeCart"
+                                class="min-h-12 px-4 rounded-xl border border-slate-300 text-slate-700 font-semibold text-xs hover:bg-slate-100 transition-colors">
+                            Kembali
+                        </button>
+                        <button type="submit"
+                                wire:loading.attr="disabled"
+                                wire:target="submitOrder"
+                                class="flex-1 min-h-12 rounded-xl bg-amber-800 hover:bg-amber-900 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all disabled:opacity-50">
+                            <span wire:loading.remove wire:target="submitOrder">Kirim Pesanan Sekarang</span>
+                            <span wire:loading wire:target="submitOrder" class="flex items-center gap-2">
+                                <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span>Memproses...</span>
+                            </span>
+                        </button>
+                    </div>
                 </div>
-            </div>
+            </form>
         </div>
     @endif
 </div>
