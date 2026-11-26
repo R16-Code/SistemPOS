@@ -14,7 +14,6 @@ Aplikasi Point of Sale (POS), Kitchen Display System (KDS), dan pemesanan mandir
 - [Instalasi Lokal](#instalasi-lokal)
 - [Akun Demo](#akun-demo)
 - [Pengujian dan Format Kode](#pengujian-dan-format-kode)
-- [Lisensi](#lisensi)
 
 ## Alur Kerja Sistem
 
@@ -286,7 +285,3 @@ Untuk merapikan format kode PHP menggunakan Laravel Pint:
 ```bash
 vendor/bin/pint --dirty
 ```
-
-## Lisensi
-
-Proyek ini dirilis di bawah lisensi [MIT](https://opensource.org/licenses/MIT).
